@@ -298,6 +298,7 @@
   </div>
   <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
 
+
   <script>
     const appState = {
       players: [],
@@ -669,6 +670,17 @@
 
     switchTheme(appState.theme);
     renderAll();
+	
+	const STORAGE_KEY = "badminton_tournament_data";
+
+function saveData(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadData() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : null;
+}
   </script>
 </body>
 </html>
