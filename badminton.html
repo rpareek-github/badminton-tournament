@@ -299,645 +299,388 @@
   <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
 
 
-<script>
-const STORAGE_KEY = 'badminton_tournament_state';
+  <script>
+    const appState = {
+      players: [],
+      teams: [],
+      matches: [],
+      playoffs: [],
+      adminLoggedIn: false,
+      tournamentCreated: false,
+      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    };
 
-const appState = {
-  players: [],
-  teams: [],
-  matches: [],
-  playoffs: [],
-  groups: [],
-  mode: 'single',
-  adminLoggedIn: false,
-  tournamentCreated: false,
-  theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-};
+    const TEAM_NAMES = ['Avengers','Thunderbolts','Guardians','Asgardians','Vibranium Vipers','Wakanda Wings','Quantum Smash','Stormbreakers','Nova Racquets','Infinity Shuttlers','Web Warriors','Crimson Falcons','Mystic Hawks','Iron Rallies','Celestial Drops'];
+    const ADMIN = { username: 'admin', password: 'smash123' };
 
-const TEAM_NAMES = [
-  'Avengers','Thunderbolts','Guardians','Asgardians','Vibranium Vipers','Wakanda Wings',
-  'Quantum Smash','Stormbreakers','Nova Racquets','Infinity Shuttlers','Web Warriors',
-  'Crimson Falcons','Mystic Hawks','Iron Rallies','Celestial Drops','Shadow Serves',
-  'Phantom Clears','Titan Smashers','Orbital Aces','Midnight Rallies','Sky Smashers',
-  'Rally Kings','Ace Strikers','Smash Lords'
-];
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
 
-const ADMIN = { username: 'admin', password: 'smash123' };
+    function shuffle(arr) {
+      const clone = [...arr];
+      for (let i = clone.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [clone[i], clone[j]] = [clone[j], clone[i]];
+      }
+      return clone;
+    }
 
-const s = (sel) => document.querySelector(sel);
-const $$ = (sel) => [...document.querySelectorAll(sel)];
+    function uid(prefix='id') { return `${prefix}-${Math.random().toString(36).slice(2, 9)}`; }
 
-function uid(prefix = 'id') {
-  return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
-}
+    function toast(message) {
+      const div = document.createElement('div');
+      div.className = 'toast';
+      div.textContent = message;
+      $('#toastWrap').appendChild(div);
+      setTimeout(() => div.remove(), 2600);
+    }
 
-function shuffle(arr) {
-  const clone = [...arr];
-  for (let i = clone.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [clone[i], clone[j]] = [clone[j], clone[i]];
-  }
-  return clone;
-}
+    function switchTheme(next) {
+      appState.theme = next;
+      document.documentElement.setAttribute('data-theme', next);
+      $('[data-theme-toggle]').innerHTML = next === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
 
-function toast(message) {
-  const div = document.createElement('div');
-  div.className = 'toast';
-  div.textContent = message;
-  toastWrap.appendChild(div);
-  setTimeout(() => div.remove(), 2400);
-}
+    function renderPlayers() {
+      const list = $('#playerList');
+      list.innerHTML = '';
+      if (!appState.players.length) {
+        list.innerHTML = '<div class="note">No players registered yet.</div>';
+      } else {
+        appState.players.forEach((name, index) => {
+          const row = document.createElement('div');
+          row.className = 'player-item';
+          row.innerHTML = `<div><strong>${name}</strong><div style="font-size:var(--text-xs);color:var(--color-text-muted);">Player ${index + 1}</div></div><button class="btn btn-secondary" data-remove-player="${index}">Remove</button>`;
+          list.appendChild(row);
+        });
+      }
+      $('#statPlayers').textContent = appState.players.length;
+    }
 
-function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    function renderTeams() {
+      const list = $('#teamList');
+      const edit = $('#teamEditArea');
+      list.innerHTML = '';
+      edit.innerHTML = '';
+      if (!appState.teams.length) {
+        list.innerHTML = '<div class="note">Create the tournament to generate teams.</div>';
+        edit.innerHTML = '<div class="note">Team editor becomes available after team creation.</div>';
+        $('#statTeams').textContent = '0';
+        return;
+      }
+      appState.teams.forEach((team, index) => {
+        const card = document.createElement('div');
+        card.className = 'team-item';
+        card.innerHTML = `<div><span class="pill">Team ${index + 1}</span><strong style="display:block;margin-top:.5rem;">${team.name}</strong><div style="font-size:var(--text-sm);color:var(--color-text-muted);">${team.players.join(' & ')}</div></div><div style="font-size:var(--text-xs);color:var(--color-text-muted);">${team.players.length} players</div>`;
+        list.appendChild(card);
+
+        const editCard = document.createElement('div');
+        editCard.className = 'match-card';
+        editCard.innerHTML = `
+          <div class="match-header"><strong>${team.name}</strong><span class="pill">Editable</span></div>
+          <div class="grid-2" style="margin-top:1rem;">
+            <div class="field"><label>Player 1</label><select data-team-edit="${team.id}" data-slot="0">${appState.players.map(p => `<option value="${p}" ${p === team.players[0] ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <div class="field"><label>Player 2</label><select data-team-edit="${team.id}" data-slot="1">${appState.players.map(p => `<option value="${p}" ${p === team.players[1] ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+          </div>`;
+        edit.appendChild(editCard);
+      });
+      $('#statTeams').textContent = appState.teams.length;
+    }
+
+    function createRoundRobin(teams) {
+      const matches = [];
+      for (let i = 0; i < teams.length; i++) {
+        for (let j = i + 1; j < teams.length; j++) {
+          matches.push({ id: uid('match'), stage: 'Round Robin', teamA: teams[i].id, teamB: teams[j].id, winner: null });
+        }
+      }
+      return matches;
+    }
+
+    function teamById(id) { return appState.teams.find(t => t.id === id) || { name: 'TBD', players: [] }; }
+
+    function buildStandings() {
+      return appState.teams.map(team => {
+        const played = appState.matches.filter(m => (m.teamA === team.id || m.teamB === team.id) && m.winner).length;
+        const wins = appState.matches.filter(m => m.winner === team.id).length;
+        return { id: team.id, name: team.name, players: team.players, played, wins, points: wins };
+      }).sort((a,b) => b.points - a.points || b.wins - a.wins || a.name.localeCompare(b.name));
+    }
+
+    function allRoundRobinFinished() {
+      return appState.matches.length && appState.matches.every(m => !!m.winner);
+    }
+
+    function refreshPlayoffs() {
+      appState.playoffs = [];
+      const standings = buildStandings();
+      const tieNotice = $('#tieBreakerNotice');
+      const playoffWrap = $('#playoffMatches');
+      tieNotice.innerHTML = 'Complete the round-robin stage to generate tie-breaks and semi-final placements.';
+      playoffWrap.innerHTML = '';
+      $('#semi1').innerHTML = '<strong>TBD</strong><small>Top seed vs fourth seed</small>';
+      $('#semi2').innerHTML = '<strong>TBD</strong><small>Second seed vs third seed</small>';
+      $('#tiebreakSlot').innerHTML = '<strong>None</strong><small>Auto-created only when points are tied around qualification spots.</small>';
+      $('#finalSlot').innerHTML = '<strong>TBD</strong><small>Winners of both semi-finals</small>';
+      $('#championSlot').innerHTML = '<strong>Not decided</strong><small>Record results to crown the winner.</small>';
+
+      if (!allRoundRobinFinished() || standings.length < 4) return;
+
+      const fourthPoints = standings[3].points;
+      const tiedForQualification = standings.filter(s => s.points === fourthPoints);
+      let qualified = standings.slice(0, 4);
+
+      if (tiedForQualification.length > 1 && tiedForQualification.some(t => standings.indexOf(t) >= 3)) {
+        const ids = tiedForQualification.map(t => t.id);
+        if (ids.length >= 2) {
+          const tieMatch = { id: 'tie-breaker', stage: 'Tie-break', teamA: ids[0], teamB: ids[1], winner: null };
+          appState.playoffs.push(tieMatch);
+          $('#tiebreakSlot').innerHTML = `<strong>${teamById(ids[0]).name} vs ${teamById(ids[1]).name}</strong><small>Winner takes the last qualifying seed.</small>`;
+          tieNotice.innerHTML = 'A tie affected qualification, so the app created a playoff before semi-finals.';
+        }
+      }
+
+      if (!appState.playoffs.find(p => p.stage === 'Tie-break' && !p.winner)) {
+        const semiTeams = qualified;
+        const semi1 = { id: 'semi-1', stage: 'Semi-final', teamA: semiTeams[0]?.id, teamB: semiTeams[3]?.id, winner: appState.playoffs.find(p => p.id === 'semi-1')?.winner || null };
+        const semi2 = { id: 'semi-2', stage: 'Semi-final', teamA: semiTeams[1]?.id, teamB: semiTeams[2]?.id, winner: appState.playoffs.find(p => p.id === 'semi-2')?.winner || null };
+        const final = { id: 'final', stage: 'Final', teamA: null, teamB: null, winner: appState.playoffs.find(p => p.id === 'final')?.winner || null };
+        appState.playoffs = [semi1, semi2, final];
+        $('#semi1').innerHTML = `<strong>${teamById(semi1.teamA).name} vs ${teamById(semi1.teamB).name}</strong><small>${teamById(semi1.teamA).players.join(' & ')} vs ${teamById(semi1.teamB).players.join(' & ')}</small>`;
+        $('#semi2').innerHTML = `<strong>${teamById(semi2.teamA).name} vs ${teamById(semi2.teamB).name}</strong><small>${teamById(semi2.teamA).players.join(' & ')} vs ${teamById(semi2.teamB).players.join(' & ')}</small>`;
+      }
+
+      const tieWinner = appState.playoffs.find(p => p.id === 'tie-breaker' && p.winner);
+      if (tieWinner) {
+        const replacement = tieWinner.winner;
+        qualified = standings.slice(0, 3).concat(standings.filter(s => s.id === replacement));
+        const semi1 = { id: 'semi-1', stage: 'Semi-final', teamA: qualified[0]?.id, teamB: qualified[3]?.id, winner: appState.playoffs.find(p => p.id === 'semi-1')?.winner || null };
+        const semi2 = { id: 'semi-2', stage: 'Semi-final', teamA: qualified[1]?.id, teamB: qualified[2]?.id, winner: appState.playoffs.find(p => p.id === 'semi-2')?.winner || null };
+        const final = appState.playoffs.find(p => p.id === 'final') || { id: 'final', stage: 'Final', teamA: null, teamB: null, winner: null };
+        appState.playoffs = [appState.playoffs.find(p => p.id === 'tie-breaker'), semi1, semi2, final];
+        $('#semi1').innerHTML = `<strong>${teamById(semi1.teamA).name} vs ${teamById(semi1.teamB).name}</strong><small>${teamById(semi1.teamA).players.join(' & ')} vs ${teamById(semi1.teamB).players.join(' & ')}</small>`;
+        $('#semi2').innerHTML = `<strong>${teamById(semi2.teamA).name} vs ${teamById(semi2.teamB).name}</strong><small>${teamById(semi2.teamA).players.join(' & ')} vs ${teamById(semi2.teamB).players.join(' & ')}</small>`;
+      }
+
+      const semi1 = appState.playoffs.find(p => p.id === 'semi-1');
+      const semi2 = appState.playoffs.find(p => p.id === 'semi-2');
+      const final = appState.playoffs.find(p => p.id === 'final');
+
+      if (semi1 && semi2 && semi1.winner && semi2.winner) {
+        final.teamA = semi1.winner;
+        final.teamB = semi2.winner;
+        $('#finalSlot').innerHTML = `<strong>${teamById(final.teamA).name} vs ${teamById(final.teamB).name}</strong><small>Final is ready to play.</small>`;
+      }
+      if (final && final.winner) {
+        $('#championSlot').innerHTML = `<strong>${teamById(final.winner).name}</strong><small>${teamById(final.winner).players.join(' & ')}</small>`;
+      }
+      renderPlayoffMatches();
+    }
+
+    function renderMatches() {
+      const list = $('#matchList');
+      list.innerHTML = '';
+      if (!appState.matches.length) {
+        list.innerHTML = '<div class="note">No fixtures yet. Admin needs to create the tournament.</div>';
+        $('#statMatches').textContent = '0';
+        return;
+      }
+      appState.matches.forEach((match, index) => {
+        const teamA = teamById(match.teamA), teamB = teamById(match.teamB);
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-header"><span class="pill">Match ${index + 1}</span><span style="font-size:var(--text-xs);color:var(--color-text-muted);">${match.stage}</span></div>
+          <div class="match-body">
+            <div class="team-badge"><strong>${teamA.name}</strong><span>${teamA.players.join(' & ')}</span></div>
+            <div class="vs">VS</div>
+            <div class="team-badge"><strong>${teamB.name}</strong><span>${teamB.players.join(' & ')}</span></div>
+          </div>
+          <div class="match-footer">
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}</div>
+            <div class="score-actions">
+              <button class="btn btn-secondary ${match.winner === match.teamA ? 'active-win' : ''}" data-result-match="${match.id}" data-winner="${match.teamA}">${teamA.name} won</button>
+              <button class="btn btn-secondary ${match.winner === match.teamB ? 'active-win' : ''}" data-result-match="${match.id}" data-winner="${match.teamB}">${teamB.name} won</button>
+            </div>
+          </div>`;
+        list.appendChild(card);
+      });
+      $('#statMatches').textContent = appState.matches.length + appState.playoffs.length;
+    }
+
+    function renderStandings() {
+      const body = $('#standingsBody');
+      const standings = buildStandings();
+      body.innerHTML = '';
+      if (!standings.length) {
+        body.innerHTML = '<tr><td colspan="7">No standings yet.</td></tr>';
+        return;
+      }
+      standings.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        const status = i < 4 ? '<span class="leader">Qualifying</span>' : '<span class="danger">Outside</span>';
+        tr.innerHTML = `<td>${i + 1}</td><td><strong>${row.name}</strong></td><td>${row.players.join(' & ')}</td><td>${row.played}</td><td>${row.wins}</td><td>${row.points}</td><td>${status}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderPlayoffMatches() {
+      const wrap = $('#playoffMatches');
+      wrap.innerHTML = '';
+      appState.playoffs.forEach(match => {
+        if (!match.teamA || !match.teamB) return;
+        const teamA = teamById(match.teamA), teamB = teamById(match.teamB);
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-header"><span class="pill">${match.stage}</span><span style="font-size:var(--text-xs);color:var(--color-text-muted);">Knockout</span></div>
+          <div class="match-body">
+            <div class="team-badge"><strong>${teamA.name}</strong><span>${teamA.players.join(' & ')}</span></div>
+            <div class="vs">VS</div>
+            <div class="team-badge"><strong>${teamB.name}</strong><span>${teamB.players.join(' & ')}</span></div>
+          </div>
+          <div class="match-footer">
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}</div>
+            <div class="score-actions">
+              <button class="btn btn-secondary ${match.winner === match.teamA ? 'active-win' : ''}" data-playoff-match="${match.id}" data-winner="${match.teamA}">${teamA.name} won</button>
+              <button class="btn btn-secondary ${match.winner === match.teamB ? 'active-win' : ''}" data-playoff-match="${match.id}" data-winner="${match.teamB}">${teamB.name} won</button>
+            </div>
+          </div>`;
+        wrap.appendChild(card);
+      });
+      $('#statMatches').textContent = appState.matches.length + appState.playoffs.filter(p => p.teamA && p.teamB).length;
+    }
+
+    function renderAll() {
+      renderPlayers(); renderTeams(); renderMatches(); renderStandings(); refreshPlayoffs();
+      $('#adminPanel').classList.toggle('hidden', !document.getElementById('adminView').classList.contains('active') && !appState.adminLoggedIn);
+      $('#registrationPanel').classList.toggle('hidden', appState.tournamentCreated);
+      if (appState.adminLoggedIn) {
+        $('#adminPanel').classList.remove('hidden');
+        $('#adminLoginBlock').classList.add('hidden');
+        $('#adminActionsBlock').classList.remove('hidden');
+      } else {
+        $('#adminLoginBlock').classList.remove('hidden');
+        $('#adminActionsBlock').classList.add('hidden');
+      }
+    }
+
+    function generateTournament() {
+      if (appState.players.length < 4 || appState.players.length % 2 !== 0) {
+        toast('Use an even number of players, with at least 4 players.');
+        return;
+      }
+      const shuffledPlayers = shuffle(appState.players);
+      const shuffledNames = shuffle(TEAM_NAMES);
+      appState.teams = [];
+      for (let i = 0; i < shuffledPlayers.length; i += 2) {
+        appState.teams.push({ id: uid('team'), name: shuffledNames[i / 2] || `Team ${i/2 + 1}`, players: [shuffledPlayers[i], shuffledPlayers[i + 1]] });
+      }
+      appState.matches = createRoundRobin(appState.teams);
+      appState.playoffs = [];
+      appState.tournamentCreated = true;
+      toast('Tournament created. Teams and fixtures are ready.');
+      renderAll();
+    }
+
+    function setMatchWinner(id, winner, playoff=false) {
+      const collection = playoff ? appState.playoffs : appState.matches;
+      const match = collection.find(m => m.id === id);
+      if (!match) return;
+      match.winner = winner;
+      if (playoff && id !== 'final') {
+        const final = appState.playoffs.find(p => p.id === 'final');
+        const semi1 = appState.playoffs.find(p => p.id === 'semi-1');
+        const semi2 = appState.playoffs.find(p => p.id === 'semi-2');
+        if (final && semi1?.winner && semi2?.winner) {
+          final.teamA = semi1.winner; final.teamB = semi2.winner;
+        }
+      }
+      renderAll();
+    }
+
+    function loadDemo() {
+      appState.players = ['Rajat','Aman','Neha','Karan','Priya','Rohit','Simran','Ishaan','Megha','Dev','Ananya','Kabir'];
+      appState.adminLoggedIn = true;
+      appState.tournamentCreated = false;
+      generateTournament();
+      const firstThree = appState.matches.slice(0, 3);
+      firstThree.forEach((m, idx) => m.winner = idx % 2 === 0 ? m.teamA : m.teamB);
+      renderAll();
+      toast('Demo data loaded.');
+    }
+
+    document.addEventListener('click', e => {
+      const target = e.target.closest('button');
+      if (!target) return;
+      if (target.matches('[data-view-target]')) {
+        $$('[data-view-target]').forEach(btn => btn.classList.remove('active'));
+        target.classList.add('active');
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $('#' + target.dataset.viewTarget).classList.add('active');
+        if (target.dataset.viewTarget === 'adminView') $('#adminPanel').classList.remove('hidden');
+        renderAll();
+      }
+      if (target.dataset.removePlayer !== undefined && !appState.tournamentCreated) {
+        appState.players.splice(Number(target.dataset.removePlayer), 1);
+        renderAll();
+      }
+      if (target.id === 'addPlayerBtn') {
+        const name = $('#playerName').value.trim();
+        if (!name) return toast('Enter a player name.');
+        if (appState.players.includes(name)) return toast('That player is already registered.');
+        appState.players.push(name);
+        $('#playerName').value = '';
+        renderAll();
+      }
+      if (target.id === 'adminLoginBtn') {
+        const user = $('#adminUser').value.trim();
+        const pass = $('#adminPass').value.trim();
+        if (user === ADMIN.username && pass === ADMIN.password) {
+          appState.adminLoggedIn = true; toast('Admin access granted.'); renderAll();
+        } else toast('Invalid admin credentials.');
+      }
+      if (target.id === 'logoutBtn') { appState.adminLoggedIn = false; renderAll(); }
+      if (target.id === 'generateTournamentBtn') { generateTournament(); }
+      if (target.id === 'shuffleTeamsBtn') {
+        if (!appState.adminLoggedIn) return toast('Admin login required.');
+        generateTournament();
+      }
+      if (target.id === 'clearResultsBtn') {
+        appState.matches.forEach(m => m.winner = null);
+        appState.playoffs.forEach(m => m.winner = null);
+        toast('All match results cleared.'); renderAll();
+      }
+      if (target.id === 'resetDemoBtn') loadDemo();
+      if (target.dataset.resultMatch) setMatchWinner(target.dataset.resultMatch, target.dataset.winner, false);
+      if (target.dataset.playoffMatch) setMatchWinner(target.dataset.playoffMatch, target.dataset.winner, true);
+      if (target.matches('[data-theme-toggle]')) switchTheme(appState.theme === 'dark' ? 'light' : 'dark');
+    });
+
+    document.addEventListener('change', e => {
+      const select = e.target.closest('[data-team-edit]');
+      if (!select) return;
+      const team = appState.teams.find(t => t.id === select.dataset.teamEdit);
+      if (!team) return;
+      team.players[Number(select.dataset.slot)] = select.value;
+      renderAll();
+    });
+
+    switchTheme(appState.theme);
+    renderAll();
+	
+	const STORAGE_KEY = "badminton_tournament_data";
+
+function saveData(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try {
-    const data = JSON.parse(raw);
-    Object.assign(appState, data);
-  } catch (e) {
-    console.warn('Could not load saved data', e);
-  }
+  return raw ? JSON.parse(raw) : null;
 }
-
-function teamById(id) {
-  return appState.teams.find(t => t.id === id) || { name: 'TBD', players: [] };
-}
-
-function splitIntoGroups(teams) {
-  const groupA = [];
-  const groupB = [];
-  teams.forEach((team, index) => {
-    if (index % 2 === 0) groupA.push(team);
-    else groupB.push(team);
-  });
-  return { groupA, groupB };
-}
-
-function createMatchesForTeams(teams, stage = 'Round Robin', group = null) {
-  const matches = [];
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      matches.push({
-        id: uid('match'),
-        stage,
-        group,
-        teamA: teams[i].id,
-        teamB: teams[j].id,
-        scoreA: null,
-        scoreB: null,
-        winner: null
-      });
-    }
-  }
-  return matches;
-}
-
-function createTeamsFromPlayers() {
-  const shuffledPlayers = shuffle(appState.players);
-  const shuffledNames = shuffle(TEAM_NAMES);
-  appState.teams = [];
-
-  for (let i = 0; i < shuffledPlayers.length; i += 2) {
-    appState.teams.push({
-      id: uid('team'),
-      name: shuffledNames[i / 2] || `Team ${i / 2 + 1}`,
-      players: [shuffledPlayers[i], shuffledPlayers[i + 1]]
-    });
-  }
-}
-
-function buildStandingsForTeams(teams, matches) {
-  return teams.map(team => {
-    const teamMatches = matches.filter(m => m.teamA === team.id || m.teamB === team.id);
-    const played = teamMatches.filter(m => m.winner !== null).length;
-    const wins = teamMatches.filter(m => m.winner === team.id).length;
-
-    let scored = 0;
-    let conceded = 0;
-
-    teamMatches.forEach(m => {
-      if (m.scoreA === null || m.scoreB === null) return;
-      if (m.teamA === team.id) {
-        scored += m.scoreA;
-        conceded += m.scoreB;
-      } else {
-        scored += m.scoreB;
-        conceded += m.scoreA;
-      }
-    });
-
-    return {
-      id: team.id,
-      name: team.name,
-      players: team.players,
-      played,
-      wins,
-      points: wins,
-      scored,
-      diff: scored - conceded
-    };
-  }).sort((a, b) =>
-    b.points - a.points ||
-    b.diff - a.diff ||
-    b.scored - a.scored ||
-    a.name.localeCompare(b.name)
-  );
-}
-
-function buildOverallStandings() {
-  return buildStandingsForTeams(appState.teams, appState.matches);
-}
-
-function allRoundRobinFinished() {
-  return appState.matches.length > 0 && appState.matches.every(m => m.winner !== null);
-}
-
-function generateTournament() {
-  if (appState.players.length < 4 || appState.players.length % 2 !== 0) {
-    toast('Use an even number of players, minimum 4.');
-    return;
-  }
-
-  createTeamsFromPlayers();
-  appState.playoffs = [];
-  appState.groups = [];
-
-  if (appState.teams.length >= 8) {
-    appState.mode = 'groups';
-    const { groupA, groupB } = splitIntoGroups(appState.teams);
-    appState.groups = [
-      { name: 'A', teams: groupA },
-      { name: 'B', teams: groupB }
-    ];
-    appState.matches = [
-      ...createMatchesForTeams(groupA, 'Group Stage', 'A'),
-      ...createMatchesForTeams(groupB, 'Group Stage', 'B')
-    ];
-    toast('Tournament created with Group A and Group B.');
-  } else {
-    appState.mode = 'single';
-    appState.matches = createMatchesForTeams(appState.teams, 'Round Robin', null);
-    toast('Tournament created.');
-  }
-
-  appState.tournamentCreated = true;
-  saveData();
-  renderAll();
-}
-
-function renderPlayers() {
-  const list = s('#playerList');
-  list.innerHTML = '';
-
-  if (!appState.players.length) {
-    list.innerHTML = '<div class="notice">No players registered yet.</div>';
-  }
-
-  appState.players.forEach((name, index) => {
-    const row = document.createElement('div');
-    row.className = 'item row';
-    row.innerHTML = `
-      <div>
-        <strong>${name}</strong>
-        <div style="font-size:.85rem;color:var(--muted)">Player ${index + 1}</div>
-      </div>
-      ${!appState.tournamentCreated
-        ? `<button class="btn btn-secondary" data-remove-player="${index}">Remove</button>`
-        : `<span class="tag">Locked</span>`}
-    `;
-    list.appendChild(row);
-  });
-
-  s('#statPlayers').textContent = appState.players.length;
-}
-
-function renderTeams() {
-  const list = s('#teamList');
-  const edit = s('#teamEditArea');
-  list.innerHTML = '';
-  edit.innerHTML = '';
-
-  if (!appState.teams.length) {
-    list.innerHTML = '<div class="notice">Create the tournament to generate teams.</div>';
-    edit.innerHTML = '<div class="notice">Team editor appears after tournament creation.</div>';
-    s('#statTeams').textContent = '0';
-    return;
-  }
-
-  appState.teams.forEach((team, index) => {
-    const teamCard = document.createElement('div');
-    teamCard.className = 'item';
-    teamCard.innerHTML = `
-      <div class="row">
-        <div>
-          <span class="tag">Team ${index + 1}</span>
-          <strong style="display:block;margin-top:8px">${team.name}</strong>
-          <div style="font-size:.9rem;color:var(--muted)">${team.players.join(' & ')}</div>
-        </div>
-        <div style="font-size:.8rem;color:var(--muted)">2 players</div>
-      </div>
-    `;
-    list.appendChild(teamCard);
-
-    const editor = document.createElement('div');
-    editor.className = 'item editor-card';
-    editor.innerHTML = `
-      <div class="row" style="margin-bottom:12px">
-        <strong>${team.name}</strong>
-        <span class="tag">Edit</span>
-      </div>
-      <div class="grid-2">
-        <div class="field">
-          <label>Player 1</label>
-          <select data-team-edit="${team.id}" data-slot="0">
-            ${appState.players.map(p => `<option value="${p}" ${p === team.players[0] ? 'selected' : ''}>${p}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field">
-          <label>Player 2</label>
-          <select data-team-edit="${team.id}" data-slot="1">
-            ${appState.players.map(p => `<option value="${p}" ${p === team.players[1] ? 'selected' : ''}>${p}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    `;
-    edit.appendChild(editor);
-  });
-
-  s('#statTeams').textContent = appState.teams.length;
-}
-
-function renderMatches() {
-  const list = s('#matchList');
-  list.innerHTML = '';
-
-  if (!appState.matches.length) {
-    list.innerHTML = '<div class="notice">No fixtures yet. Create the tournament first.</div>';
-    s('#statMatches').textContent = '0';
-    return;
-  }
-
-  appState.matches.forEach((match, index) => {
-    const teamA = teamById(match.teamA);
-    const teamB = teamById(match.teamB);
-
-    const card = document.createElement('div');
-    card.className = 'match-card';
-    card.innerHTML = `
-      <div class="match-head">
-        <span class="tag">Match ${index + 1}</span>
-        <span style="font-size:.8rem;color:var(--muted)">
-          ${match.stage}${match.group ? ` · Group ${match.group}` : ''}
-        </span>
-      </div>
-
-      <div class="match-body">
-        <div class="teambox">
-          <strong>${teamA.name}</strong>
-          <span style="color:var(--muted)">${teamA.players.join(' & ')}</span>
-        </div>
-        <div class="vs">VS</div>
-        <div class="teambox">
-          <strong>${teamB.name}</strong>
-          <span style="color:var(--muted)">${teamB.players.join(' & ')}</span>
-        </div>
-      </div>
-
-      <div class="match-foot">
-        <div style="font-size:.9rem;color:var(--muted)">
-          Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}
-        </div>
-        <div class="score-actions">
-          <button class="btn btn-win-a ${match.winner === match.teamA ? 'active' : ''}" data-result-match="${match.id}" data-winner="${match.teamA}">
-            ${teamA.name} won
-          </button>
-          <button class="btn btn-win-b ${match.winner === match.teamB ? 'active' : ''}" data-result-match="${match.id}" data-winner="${match.teamB}">
-            ${teamB.name} won
-          </button>
-        </div>
-      </div>
-    `;
-    list.appendChild(card);
-  });
-
-  s('#statMatches').textContent = appState.matches.length + appState.playoffs.filter(p => p.teamA && p.teamB).length;
-}
-
-function renderStandings() {
-  const body = s('#standingsBody');
-  body.innerHTML = '';
-  const standings = buildOverallStandings();
-
-  if (!standings.length) {
-    body.innerHTML = '<tr><td colspan="8">No standings yet.</td></tr>';
-    return;
-  }
-
-  standings.forEach((row, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td><strong>${row.name}</strong></td>
-      <td>${row.players.join(' & ')}</td>
-      <td>${row.played}</td>
-      <td>${row.wins}</td>
-      <td>${row.points}</td>
-      <td>${row.diff}</td>
-      <td>${i < 4 ? '<span class="leader">Qualifying</span>' : '<span class="out">Outside</span>'}</td>
-    `;
-    body.appendChild(tr);
-  });
-}
-
-function renderPlayoffMatches() {
-  const wrap = s('#playoffMatches');
-  wrap.innerHTML = '';
-
-  appState.playoffs.forEach(match => {
-    if (!match.teamA || !match.teamB) return;
-
-    const teamA = teamById(match.teamA);
-    const teamB = teamById(match.teamB);
-
-    const card = document.createElement('div');
-    card.className = 'match-card';
-    card.innerHTML = `
-      <div class="match-head">
-        <span class="tag">${match.stage}</span>
-        <span style="font-size:.8rem;color:var(--muted)">Knockout</span>
-      </div>
-
-      <div class="match-body">
-        <div class="teambox">
-          <strong>${teamA.name}</strong>
-          <span style="color:var(--muted)">${teamA.players.join(' & ')}</span>
-        </div>
-        <div class="vs">VS</div>
-        <div class="teambox">
-          <strong>${teamB.name}</strong>
-          <span style="color:var(--muted)">${teamB.players.join(' & ')}</span>
-        </div>
-      </div>
-
-      <div class="match-foot">
-        <div style="font-size:.9rem;color:var(--muted)">
-          Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}
-        </div>
-        <div class="score-actions">
-          <button class="btn btn-win-a ${match.winner === match.teamA ? 'active' : ''}" data-playoff-match="${match.id}" data-winner="${match.teamA}">
-            ${teamA.name} won
-          </button>
-          <button class="btn btn-win-b ${match.winner === match.teamB ? 'active' : ''}" data-playoff-match="${match.id}" data-winner="${match.teamB}">
-            ${teamB.name} won
-          </button>
-        </div>
-      </div>
-    `;
-    wrap.appendChild(card);
-  });
-}
-
-function refreshPlayoffs() {
-  const semi1 = s('#semi1');
-  const semi2 = s('#semi2');
-  const tSlot = s('#tiebreakSlot');
-  const fSlot = s('#finalSlot');
-  const cSlot = s('#championSlot');
-  const notice = s('#playoffNotice');
-
-  appState.playoffs = appState.playoffs.filter(p =>
-    p.id === 'tie-breaker' || p.id === 'semi-1' || p.id === 'semi-2' || p.id === 'final'
-  );
-
-  semi1.innerHTML = '<strong>TBD</strong><small>Waiting for results</small>';
-  semi2.innerHTML = '<strong>TBD</strong><small>Waiting for results</small>';
-  tSlot.innerHTML = '<strong>None</strong><small></small>';
-  fSlot.innerHTML = '<strong>TBD</strong><small></small>';
-  cSlot.innerHTML = '<strong>Not decided</strong><small></small>';
-  notice.textContent = 'Finish the group or round-robin stage to unlock playoffs.';
-
-  if (!allRoundRobinFinished()) return;
-
-  if (appState.mode === 'groups') {
-    const groupA = appState.groups.find(g => g.name === 'A')?.teams || [];
-    const groupB = appState.groups.find(g => g.name === 'B')?.teams || [];
-    const standingsA = buildStandingsForTeams(groupA, appState.matches.filter(m => m.group === 'A'));
-    const standingsB = buildStandingsForTeams(groupB, appState.matches.filter(m => m.group === 'B'));
-
-    const a1 = standingsA[0];
-    const a2 = standingsA[1];
-    const b1 = standingsB[0];
-    const b2 = standingsB[1];
-
-    appState.playoffs = [
-      { id: 'semi-1', stage: 'Semi-final', teamA: a1?.id || null, teamB: b2?.id || null, winner: null },
-      { id: 'semi-2', stage: 'Semi-final', teamA: b1?.id || null, teamB: a2?.id || null, winner: null },
-      { id: 'final', stage: 'Final', teamA: null, teamB: null, winner: null }
-    ];
-
-    semi1.innerHTML = a1 && b2
-      ? `<strong>${a1.name} vs ${b2.name}</strong><small>Group A #1 vs Group B #2</small>`
-      : '<strong>TBD</strong><small>Waiting for results</small>';
-
-    semi2.innerHTML = b1 && a2
-      ? `<strong>${b1.name} vs ${a2.name}</strong><small>Group B #1 vs Group A #2</small>`
-      : '<strong>TBD</strong><small>Waiting for results</small>';
-
-    notice.textContent = 'Top 2 teams from each group advance to the semifinals.';
-    renderPlayoffMatches();
-    updateFinal();
-    return;
-  }
-
-  const standings = buildOverallStandings();
-  if (standings.length < 4) return;
-
-  const fourthPts = standings[3].points;
-  const tied = standings.filter(x => x.points === fourthPts);
-
-  if (tied.length > 1 && tied.some(t => standings.indexOf(t) >= 3)) {
-    const ids = tied.slice(0, 2).map(t => t.id);
-    if (ids.length === 2) {
-      appState.playoffs = [
-        { id: 'tie-breaker', stage: 'Tie-break', teamA: ids[0], teamB: ids[1], winner: null }
-      ];
-      tSlot.innerHTML = `<strong>${teamById(ids[0]).name} vs ${teamById(ids[1]).name}</strong><small>Winner takes the last qualifying spot</small>`;
-      notice.textContent = 'A tie affects qualification, so a tie-break match was created.';
-      renderPlayoffMatches();
-      updateFinal();
-      return;
-    }
-  }
-
-  appState.playoffs = [
-    { id: 'semi-1', stage: 'Semi-final', teamA: standings[0]?.id || null, teamB: standings[3]?.id || null, winner: null },
-    { id: 'semi-2', stage: 'Semi-final', teamA: standings[1]?.id || null, teamB: standings[2]?.id || null, winner: null },
-    { id: 'final', stage: 'Final', teamA: null, teamB: null, winner: null }
-  ];
-
-  semi1.innerHTML = `<strong>${teamById(appState.playoffs[0].teamA).name} vs ${teamById(appState.playoffs[0].teamB).name}</strong><small>Top seed vs fourth seed</small>`;
-  semi2.innerHTML = `<strong>${teamById(appState.playoffs[1].teamA).name} vs ${teamById(appState.playoffs[1].teamB).name}</strong><small>Second seed vs third seed</small>`;
-  renderPlayoffMatches();
-  updateFinal();
-}
-
-function updateFinal() {
-  const s1 = appState.playoffs.find(p => p.id === 'semi-1');
-  const s2 = appState.playoffs.find(p => p.id === 'semi-2');
-  const f = appState.playoffs.find(p => p.id === 'final');
-
-  if (f && s1?.winner && s2?.winner) {
-    f.teamA = s1.winner;
-    f.teamB = s2.winner;
-    s('#finalSlot').innerHTML = `<strong>${teamById(f.teamA).name} vs ${teamById(f.teamB).name}</strong><small>Final ready</small>`;
-  }
-
-  if (f?.winner) {
-    s('#championSlot').innerHTML = `<strong>${teamById(f.winner).name}</strong><small>${teamById(f.winner).players.join(' & ')}</small>`;
-  }
-}
-
-function renderAll() {
-  renderPlayers();
-  renderTeams();
-  renderMatches();
-  renderStandings();
-  refreshPlayoffs();
-
-  s('#adminCard').classList.toggle('hidden', !s('#adminView').classList.contains('active') && !appState.adminLoggedIn);
-  s('#registerCard').classList.toggle('hidden', appState.tournamentCreated);
-
-  if (appState.adminLoggedIn) {
-    s('#loginBox').classList.add('hidden');
-    s('#adminBox').classList.remove('hidden');
-  } else {
-    s('#loginBox').classList.remove('hidden');
-    s('#adminBox').classList.add('hidden');
-  }
-
-  saveData();
-}
-
-function loadDemo() {
-  appState.players = ['Rajat','Aman','Neha','Karan','Priya','Rohit','Simran','Ishaan','Megha','Dev','Ananya','Kabir'];
-  appState.adminLoggedIn = true;
-  generateTournament();
-
-  appState.matches.slice(0, 4).forEach((m, i) => {
-    m.winner = i % 2 === 0 ? m.teamA : m.teamB;
-    m.scoreA = i % 2 === 0 ? 21 : 18;
-    m.scoreB = i % 2 === 0 ? 15 : 21;
-  });
-
-  renderAll();
-  toast('Demo loaded.');
-}
-
-function resetAll() {
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-}
-
-document.addEventListener('click', e => {
-  const btn = e.target.closest('button');
-  if (!btn) return;
-
-  if (btn.dataset.view) {
-    $$('.tabs button').forEach(x => x.classList.toggle('active', x.dataset.view === btn.dataset.view));
-    $$('.view').forEach(v => v.classList.remove('active'));
-    s('#' + btn.dataset.view).classList.add('active');
-    s('#adminCard').classList.toggle('hidden', !s('#adminView').classList.contains('active') && !appState.adminLoggedIn);
-  }
-
-  if (btn.id === 'addPlayerBtn') {
-    const name = s('#playerName').value.trim();
-    if (!name) return toast('Enter a player name.');
-    if (appState.players.includes(name)) return toast('That player is already added.');
-    appState.players.push(name);
-    s('#playerName').value = '';
-    renderAll();
-  }
-
-  if (btn.dataset.removePlayer !== undefined && !appState.tournamentCreated) {
-    appState.players.splice(Number(btn.dataset.removePlayer), 1);
-    renderAll();
-  }
-
-  if (btn.id === 'loginBtn') {
-    if (
-      s('#adminUser').value.trim() === ADMIN.username &&
-      s('#adminPass').value.trim() === ADMIN.password
-    ) {
-      appState.adminLoggedIn = true;
-      toast('Admin logged in.');
-      renderAll();
-    } else {
-      toast('Invalid credentials.');
-    }
-  }
-
-  if (btn.id === 'logoutBtn') {
-    appState.adminLoggedIn = false;
-    renderAll();
-  }
-
-  if (btn.id === 'createTournamentBtn' || btn.id === 'rebuildBtn') {
-    generateTournament();
-  }
-
-  if (btn.id === 'resetAllBtn') {
-    resetAll();
-  }
-
-  if (btn.id === 'loadDemoBtn') {
-    loadDemo();
-  }
-
-  if (btn.dataset.resultMatch) {
-    const m = appState.matches.find(x => x.id === btn.dataset.resultMatch);
-    if (m) {
-      m.winner = btn.dataset.winner;
-      m.scoreA = m.teamA === btn.dataset.winner ? 21 : 18;
-      m.scoreB = m.teamB === btn.dataset.winner ? 21 : 18;
-      toast(teamById(btn.dataset.winner).name + ' won');
-      saveData();
-      renderAll();
-    }
-  }
-
-  if (btn.dataset.playoffMatch) {
-    const m = appState.playoffs.find(x => x.id === btn.dataset.playoffMatch);
-    if (m) {
-      m.winner = btn.dataset.winner;
-      m.scoreA = m.teamA === btn.dataset.winner ? 21 : 18;
-      m.scoreB = m.teamB === btn.dataset.winner ? 21 : 18;
-      toast(teamById(btn.dataset.winner).name + ' won');
-      if (m.id === 'semi-1' || m.id === 'semi-2') updateFinal();
-      if (m.id === 'final') {
-        s('#championSlot').innerHTML = `<strong>${teamById(m.winner).name}</strong><small>${teamById(m.winner).players.join(' & ')}</small>`;
-      }
-      saveData();
-      renderAll();
-    }
-  }
-});
-
-document.addEventListener('change', e => {
-  const sel = e.target.closest('[data-team-edit]');
-  if (!sel) return;
-  const team = appState.teams.find(t => t.id === sel.dataset.teamEdit);
-  if (!team) return;
-  team.players[Number(sel.dataset.slot)] = sel.value;
-  saveData();
-  renderAll();
-});
-
-loadData();
-renderAll();
-</script>
+  </script>
 </body>
 </html>
