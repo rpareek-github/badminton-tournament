@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Badminton Tournament Manager</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&f[]=general-sans@500,600,700&display=swap" rel="stylesheet" />
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #f3f0ec; --color-surface-dynamic: #e6e4df;
+      --color-divider: #dcd9d5; --color-border: #d4d1ca; --color-text: #28251d; --color-text-muted: #6f6d67; --color-text-faint: #9d9a93; --color-text-inverse: #f9f8f4;
+      --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8; --color-success: #437a22; --color-warning: #d19900; --color-error: #a12c7b; --color-blue: #006494; --color-purple: #7a39bb;
+      --radius-sm: 0.375rem; --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.25rem; --radius-full: 999px;
+      --shadow-sm: 0 1px 2px rgba(40,37,29,.06); --shadow-md: 0 8px 24px rgba(40,37,29,.08); --shadow-lg: 0 18px 40px rgba(40,37,29,.12);
+      --font-display: 'General Sans', 'Inter', sans-serif; --font-body: 'Satoshi', 'Inter', sans-serif;
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-surface-offset: #22211f; --color-surface-dynamic: #2d2c2a;
+      --color-divider: #262523; --color-border: #393836; --color-text: #e5e2da; --color-text-muted: #a5a199; --color-text-faint: #74716b; --color-text-inverse: #1c1b19;
+      --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b; --color-success: #6daa45; --color-warning: #e8af34; --color-error: #d163a7; --color-blue: #5591c7; --color-purple: #a86fdf;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.22); --shadow-md: 0 8px 24px rgba(0,0,0,.28); --shadow-lg: 0 18px 40px rgba(0,0,0,.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { min-height: 100vh; font-family: var(--font-body); font-size: var(--text-base); line-height: 1.6; background: radial-gradient(circle at top right, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 34%), var(--color-bg); color: var(--color-text); }
+    img, svg { display: block; max-width: 100%; }
+    button, input, select { font: inherit; color: inherit; }
+    button { border: none; cursor: pointer; transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition); }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    input, select { width: 100%; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); border-radius: var(--radius-md); padding: 0.9rem 1rem; background: var(--color-surface-2); }
+    input:focus, select:focus { outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, white); outline-offset: 2px; }
+    a { color: inherit; }
+    .app { max-width: 1440px; margin: 0 auto; padding: var(--space-4); }
+    .skip-link { position: absolute; left: -9999px; top: var(--space-2); background: var(--color-primary); color: var(--color-text-inverse); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); }
+    .skip-link:focus { left: var(--space-2); z-index: 100; }
+    .topbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-4) 0; backdrop-filter: blur(12px); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-logo { width: 44px; height: 44px; padding: 10px; border-radius: 14px; background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-blue) 55%, var(--color-primary))); color: white; box-shadow: var(--shadow-md); }
+    .brand h1 { font: 700 var(--text-lg)/1.1 var(--font-display); }
+    .brand p { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .icon-btn, .btn { min-height: 44px; padding: 0.8rem 1rem; border-radius: var(--radius-md); }
+    .icon-btn { width: 44px; padding: 0; border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); background: var(--color-surface); display: grid; place-items: center; }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); box-shadow: var(--shadow-sm); }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
+    .btn-danger { background: color-mix(in srgb, var(--color-error) 14%, var(--color-surface)); color: var(--color-error); border: 1px solid color-mix(in srgb, var(--color-error) 28%, transparent); }
+    .hero { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-6); align-items: stretch; margin-bottom: var(--space-6); }
+    .panel { background: color-mix(in srgb, var(--color-surface) 88%, transparent); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
+    .hero-copy, .hero-side, .section { padding: var(--space-6); }
+    .eyebrow { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: var(--space-4); padding: .4rem .8rem; background: var(--color-primary-highlight); color: var(--color-primary); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .hero-copy h2 { font: 700 var(--text-xl)/1.05 var(--font-display); max-width: 12ch; margin-bottom: var(--space-4); }
+    .hero-copy p { max-width: 58ch; color: var(--color-text-muted); margin-bottom: var(--space-5); }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+    .stat { background: var(--color-surface-2); border-radius: var(--radius-lg); padding: var(--space-4); border: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); }
+    .stat strong { display: block; font: 700 var(--text-lg)/1 var(--font-display); margin-bottom: .3rem; }
+    .stat span { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .hero-side { display: grid; gap: var(--space-4); }
+    .match-visual { display: grid; gap: var(--space-3); }
+    .court { position: relative; min-height: 280px; border-radius: var(--radius-xl); overflow: hidden; background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-2)), var(--color-surface)); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+    .court:before, .court:after { content: ''; position: absolute; inset: 8% 10%; border: 2px solid color-mix(in srgb, var(--color-primary) 45%, white); border-radius: 8px; }
+    .court:after { inset: 8% 49.5% 8% auto; width: 1px; background: color-mix(in srgb, var(--color-primary) 45%, white); border: none; }
+    .shuttle { position: absolute; width: 68px; height: 68px; right: 14%; top: 18%; border-radius: 50%; background: radial-gradient(circle at 30% 30%, white, color-mix(in srgb, white 75%, var(--color-primary)) 58%, color-mix(in srgb, var(--color-primary) 60%, white)); box-shadow: 0 8px 18px rgba(0,0,0,.12); animation: float 4s ease-in-out infinite; }
+    .player-dot { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--color-primary); box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+    .p1 { left: 22%; top: 28%; } .p2 { left: 31%; bottom: 22%; } .p3 { right: 24%; top: 28%; background: var(--color-warning); box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-warning) 20%, transparent);} .p4 { right: 33%; bottom: 22%; background: var(--color-warning); box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-warning) 20%, transparent);} 
+    @keyframes float { 0%,100% { transform: translateY(0) rotate(0deg);} 50% { transform: translateY(-10px) rotate(8deg);} }
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: var(--space-6); align-items: start; }
+    .sidebar, .main { display: grid; gap: var(--space-6); }
+    .section h3 { font: 700 var(--text-lg)/1.15 var(--font-display); margin-bottom: var(--space-4); }
+    .section p.lead { color: var(--color-text-muted); margin-bottom: var(--space-4); }
+    .field { display: grid; gap: .45rem; margin-bottom: var(--space-4); }
+    .field label { font-size: var(--text-sm); font-weight: 700; }
+    .inline { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+    .inline > * { flex: 1 1 140px; }
+    .card-list { display: grid; gap: var(--space-3); }
+    .player-item, .team-item, .match-card, .standing-row, .bracket-card, .note, .tabbar { background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); border-radius: var(--radius-lg); }
+    .player-item, .team-item, .standing-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: .8rem 1rem; }
+    .pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .7rem; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary); }
+    .note { padding: 1rem; color: var(--color-text-muted); }
+    .tabbar { display: flex; flex-wrap: wrap; padding: .4rem; gap: .4rem; }
+    .tabbar button { flex: 1 1 140px; min-height: 42px; border-radius: 12px; color: var(--color-text-muted); }
+    .tabbar button.active { background: var(--color-primary); color: var(--color-text-inverse); }
+    .view { display: none; }
+    .view.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .matches { display: grid; gap: var(--space-4); }
+    .match-card { padding: var(--space-4); }
+    .match-header, .match-footer { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .match-body { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-3); padding: var(--space-4) 0; }
+    .team-badge { padding: 1rem; border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+    .team-badge strong { display: block; margin-bottom: .3rem; }
+    .vs { font: 700 var(--text-lg)/1 var(--font-display); color: var(--color-text-faint); }
+    .score-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .score-actions button.active-win { background: color-mix(in srgb, var(--color-success) 16%, var(--color-surface)); color: var(--color-success); border: 1px solid color-mix(in srgb, var(--color-success) 28%, transparent); }
+    .score-actions button.active-loss { background: color-mix(in srgb, var(--color-error) 16%, var(--color-surface)); color: var(--color-error); border: 1px solid color-mix(in srgb, var(--color-error) 28%, transparent); }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums lining-nums; }
+    th, td { text-align: left; padding: .9rem .8rem; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+    th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); }
+    .leader { color: var(--color-success); font-weight: 700; }
+    .danger { color: var(--color-error); }
+    .bracket { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); align-items: start; }
+    .bracket-col { display: grid; gap: var(--space-4); }
+    .bracket-card { padding: var(--space-4); min-height: 140px; }
+    .bracket-card h4 { font-size: var(--text-sm); margin-bottom: .8rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .slot { padding: .8rem; border-radius: 12px; background: var(--color-surface); border: 1px dashed color-mix(in srgb, var(--color-text) 14%, transparent); margin-bottom: .7rem; }
+    .slot strong { display:block; }
+    .slot small { color: var(--color-text-muted); }
+    .admin-lock { display: grid; gap: var(--space-4); }
+    .hidden { display:none !important; }
+    .footer-note { text-align: center; color: var(--color-text-muted); padding: var(--space-8) 0 var(--space-4); font-size: var(--text-sm); }
+    .toast-wrap { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 10px; z-index: 40; }
+    .toast { background: var(--color-text); color: var(--color-text-inverse); padding: .85rem 1rem; border-radius: 14px; box-shadow: var(--shadow-lg); min-width: 240px; }
+    @media (max-width: 1080px) { .hero, .layout, .grid-2, .bracket { grid-template-columns: 1fr; } .hero-copy h2 { max-width: 16ch; } }
+    @media (max-width: 680px) { .app { padding: .8rem; } .topbar { align-items: flex-start; flex-direction: column; } .stat-grid { grid-template-columns: 1fr; } .match-body { grid-template-columns: 1fr; } .vs { text-align:center; } .hero-copy, .hero-side, .section { padding: var(--space-5); } }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Badminton logo">
+            <path d="M6 18c4-1 7-4 8-8"/>
+            <path d="M13 3l8 8"/>
+            <path d="M10 6l8 8"/>
+            <path d="M7 9l8 8"/>
+            <path d="M4 12l8 8"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Badminton Tournament Manager</h1>
+          <p>Doubles fixture planner with leaderboard, semis, finals, and tie-break logic.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="icon-btn" data-theme-toggle aria-label="Switch theme">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-secondary" id="resetDemoBtn">Load demo</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="panel hero-copy">
+          <span class="eyebrow">Doubles + leaderboard + bracket</span>
+          <h2>Run your tournament without spreadsheets.</h2>
+          <p>Players can register their names, the admin can create doubles teams automatically, and the app builds a round-robin schedule where each team plays every other team once. It then tracks wins, tie-breaker playoffs, semi-finals, and the final in one place.</p>
+          <div class="stat-grid">
+            <div class="stat"><strong id="statPlayers">0</strong><span>Registered players</span></div>
+            <div class="stat"><strong id="statTeams">0</strong><span>Generated teams</span></div>
+            <div class="stat"><strong id="statMatches">0</strong><span>Total scheduled matches</span></div>
+          </div>
+        </div>
+        <div class="panel hero-side">
+          <div class="match-visual">
+            <div class="court" aria-hidden="true">
+              <div class="player-dot p1"></div><div class="player-dot p2"></div><div class="player-dot p3"></div><div class="player-dot p4"></div><div class="shuttle"></div>
+            </div>
+            <div class="note">Standard flow: register players, admin login, generate teams, record winners, review leaderboard, then let the top teams move into semis and the final.</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="panel section">
+            <h3>Home actions</h3>
+            <p class="lead">Players can register here. Admin can log in to generate or edit the tournament.</p>
+            <div class="tabbar" role="tablist" aria-label="Views">
+              <button class="active" data-view-target="homeView">Home</button>
+              <button data-view-target="tournamentView">Tournament</button>
+              <button data-view-target="adminView">Admin</button>
+            </div>
+          </section>
+
+          <section class="panel section" id="registrationPanel">
+            <h3>Player registration</h3>
+            <div class="field">
+              <label for="playerName">Player name</label>
+              <input id="playerName" type="text" maxlength="40" placeholder="Enter player name" />
+            </div>
+            <button class="btn btn-primary" id="addPlayerBtn">Add player</button>
+            <div class="note" style="margin-top:1rem;">Recommended total: 12 or 14 players. The app creates pairs, so an even number is required.</div>
+          </section>
+
+          <section class="panel section hidden" id="adminPanel">
+            <h3>Admin controls</h3>
+            <div class="admin-lock" id="adminLoginBlock">
+              <div class="field">
+                <label for="adminUser">Admin username</label>
+                <input id="adminUser" type="text" placeholder="Admin username" />
+              </div>
+              <div class="field">
+                <label for="adminPass">Password</label>
+                <input id="adminPass" type="password" placeholder="Password" />
+              </div>
+              <button class="btn btn-primary" id="adminLoginBtn">Login</button>
+            </div>
+            <div class="admin-lock hidden" id="adminActionsBlock">
+              <div class="inline">
+                <button class="btn btn-primary" id="generateTournamentBtn">Create tournament</button>
+                <button class="btn btn-secondary" id="logoutBtn">Logout</button>
+              </div>
+              <div class="inline">
+                <button class="btn btn-secondary" id="shuffleTeamsBtn">Rebuild teams</button>
+                <button class="btn btn-danger" id="clearResultsBtn">Clear scores</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel section">
+            <h3>Registered players</h3>
+            <div id="playerList" class="card-list"></div>
+          </section>
+        </aside>
+
+        <section class="main">
+          <div id="homeView" class="view active">
+            <section class="panel section">
+              <h3>How it works</h3>
+              <div class="grid-2">
+                <div class="note"><span class="pill">1</span><p style="margin-top:.7rem;">Players add their names from the home page.</p></div>
+                <div class="note"><span class="pill">2</span><p style="margin-top:.7rem;">Admin logs in and creates randomized doubles teams with Marvel-style names.</p></div>
+                <div class="note"><span class="pill">3</span><p style="margin-top:.7rem;">Each team plays each other once in the round-robin stage, which already guarantees more than two matches per team when you have 4+ teams.</p></div>
+                <div class="note"><span class="pill">4</span><p style="margin-top:.7rem;">Wins give 1 point, losses give 0. Tie groups trigger playoff matches before semi-finals and the final bracket.</p></div>
+              </div>
+            </section>
+          </div>
+
+          <div id="tournamentView" class="view">
+            <section class="panel section">
+              <h3>Teams</h3>
+              <div id="teamList" class="card-list"></div>
+            </section>
+            <section class="panel section">
+              <h3>Round-robin fixtures</h3>
+              <div id="matchList" class="matches"></div>
+            </section>
+            <section class="panel section">
+              <h3>Leaderboard</h3>
+              <div style="overflow:auto;">
+                <table>
+                  <thead><tr><th>Rank</th><th>Team</th><th>Players</th><th>Played</th><th>Wins</th><th>Points</th><th>Status</th></tr></thead>
+                  <tbody id="standingsBody"></tbody>
+                </table>
+              </div>
+            </section>
+            <section class="panel section">
+              <h3>Playoffs</h3>
+              <div id="tieBreakerNotice" class="note">Complete the round-robin stage to generate tie-breaks and semi-final placements.</div>
+              <div class="bracket" id="bracketBoard">
+                <div class="bracket-col">
+                  <div class="bracket-card"><h4>Semi-final 1</h4><div id="semi1" class="slot"><strong>TBD</strong><small>Top seed vs fourth seed</small></div></div>
+                  <div class="bracket-card"><h4>Semi-final 2</h4><div id="semi2" class="slot"><strong>TBD</strong><small>Second seed vs third seed</small></div></div>
+                </div>
+                <div class="bracket-col">
+                  <div class="bracket-card"><h4>Tie-break</h4><div id="tiebreakSlot" class="slot"><strong>None</strong><small>Auto-created only when points are tied around qualification spots.</small></div></div>
+                </div>
+                <div class="bracket-col">
+                  <div class="bracket-card"><h4>Final</h4><div id="finalSlot" class="slot"><strong>TBD</strong><small>Winners of both semi-finals</small></div></div>
+                  <div class="bracket-card"><h4>Champion</h4><div id="championSlot" class="slot"><strong>Not decided</strong><small>Record results to crown the winner.</small></div></div>
+                </div>
+              </div>
+              <div id="playoffMatches" class="matches" style="margin-top:1rem;"></div>
+            </section>
+          </div>
+
+          <div id="adminView" class="view">
+            <section class="panel section">
+              <h3>Admin guide</h3>
+              <p class="lead">Default credentials in this demo are <strong>admin</strong> and <strong>smash123</strong>. Change them in the JavaScript before publishing publicly.</p>
+              <div class="grid-2">
+                <div class="note">You can remove a player before tournament creation, regenerate teams, and edit team members after teams are created.</div>
+                <div class="note">This version uses in-browser memory only, so GitHub Pages hosting is free and simple, but data resets on refresh unless you later connect a backend.</div>
+              </div>
+            </section>
+            <section class="panel section">
+              <h3>Edit teams</h3>
+              <div id="teamEditArea" class="card-list"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+
+      <p class="footer-note">Made for GitHub Pages. One static file, responsive layout, and clean doubles tournament flow.</p>
+    </main>
+  </div>
+  <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    const appState = {
+      players: [],
+      teams: [],
+      matches: [],
+      playoffs: [],
+      adminLoggedIn: false,
+      tournamentCreated: false,
+      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    };
+
+    const TEAM_NAMES = ['Avengers','Thunderbolts','Guardians','Asgardians','Vibranium Vipers','Wakanda Wings','Quantum Smash','Stormbreakers','Nova Racquets','Infinity Shuttlers','Web Warriors','Crimson Falcons','Mystic Hawks','Iron Rallies','Celestial Drops'];
+    const ADMIN = { username: 'admin', password: 'smash123' };
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
+
+    function shuffle(arr) {
+      const clone = [...arr];
+      for (let i = clone.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [clone[i], clone[j]] = [clone[j], clone[i]];
+      }
+      return clone;
+    }
+
+    function uid(prefix='id') { return `${prefix}-${Math.random().toString(36).slice(2, 9)}`; }
+
+    function toast(message) {
+      const div = document.createElement('div');
+      div.className = 'toast';
+      div.textContent = message;
+      $('#toastWrap').appendChild(div);
+      setTimeout(() => div.remove(), 2600);
+    }
+
+    function switchTheme(next) {
+      appState.theme = next;
+      document.documentElement.setAttribute('data-theme', next);
+      $('[data-theme-toggle]').innerHTML = next === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    function renderPlayers() {
+      const list = $('#playerList');
+      list.innerHTML = '';
+      if (!appState.players.length) {
+        list.innerHTML = '<div class="note">No players registered yet.</div>';
+      } else {
+        appState.players.forEach((name, index) => {
+          const row = document.createElement('div');
+          row.className = 'player-item';
+          row.innerHTML = `<div><strong>${name}</strong><div style="font-size:var(--text-xs);color:var(--color-text-muted);">Player ${index + 1}</div></div><button class="btn btn-secondary" data-remove-player="${index}">Remove</button>`;
+          list.appendChild(row);
+        });
+      }
+      $('#statPlayers').textContent = appState.players.length;
+    }
+
+    function renderTeams() {
+      const list = $('#teamList');
+      const edit = $('#teamEditArea');
+      list.innerHTML = '';
+      edit.innerHTML = '';
+      if (!appState.teams.length) {
+        list.innerHTML = '<div class="note">Create the tournament to generate teams.</div>';
+        edit.innerHTML = '<div class="note">Team editor becomes available after team creation.</div>';
+        $('#statTeams').textContent = '0';
+        return;
+      }
+      appState.teams.forEach((team, index) => {
+        const card = document.createElement('div');
+        card.className = 'team-item';
+        card.innerHTML = `<div><span class="pill">Team ${index + 1}</span><strong style="display:block;margin-top:.5rem;">${team.name}</strong><div style="font-size:var(--text-sm);color:var(--color-text-muted);">${team.players.join(' & ')}</div></div><div style="font-size:var(--text-xs);color:var(--color-text-muted);">${team.players.length} players</div>`;
+        list.appendChild(card);
+
+        const editCard = document.createElement('div');
+        editCard.className = 'match-card';
+        editCard.innerHTML = `
+          <div class="match-header"><strong>${team.name}</strong><span class="pill">Editable</span></div>
+          <div class="grid-2" style="margin-top:1rem;">
+            <div class="field"><label>Player 1</label><select data-team-edit="${team.id}" data-slot="0">${appState.players.map(p => `<option value="${p}" ${p === team.players[0] ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+            <div class="field"><label>Player 2</label><select data-team-edit="${team.id}" data-slot="1">${appState.players.map(p => `<option value="${p}" ${p === team.players[1] ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+          </div>`;
+        edit.appendChild(editCard);
+      });
+      $('#statTeams').textContent = appState.teams.length;
+    }
+
+    function createRoundRobin(teams) {
+      const matches = [];
+      for (let i = 0; i < teams.length; i++) {
+        for (let j = i + 1; j < teams.length; j++) {
+          matches.push({ id: uid('match'), stage: 'Round Robin', teamA: teams[i].id, teamB: teams[j].id, winner: null });
+        }
+      }
+      return matches;
+    }
+
+    function teamById(id) { return appState.teams.find(t => t.id === id) || { name: 'TBD', players: [] }; }
+
+    function buildStandings() {
+      return appState.teams.map(team => {
+        const played = appState.matches.filter(m => (m.teamA === team.id || m.teamB === team.id) && m.winner).length;
+        const wins = appState.matches.filter(m => m.winner === team.id).length;
+        return { id: team.id, name: team.name, players: team.players, played, wins, points: wins };
+      }).sort((a,b) => b.points - a.points || b.wins - a.wins || a.name.localeCompare(b.name));
+    }
+
+    function allRoundRobinFinished() {
+      return appState.matches.length && appState.matches.every(m => !!m.winner);
+    }
+
+    function refreshPlayoffs() {
+      appState.playoffs = [];
+      const standings = buildStandings();
+      const tieNotice = $('#tieBreakerNotice');
+      const playoffWrap = $('#playoffMatches');
+      tieNotice.innerHTML = 'Complete the round-robin stage to generate tie-breaks and semi-final placements.';
+      playoffWrap.innerHTML = '';
+      $('#semi1').innerHTML = '<strong>TBD</strong><small>Top seed vs fourth seed</small>';
+      $('#semi2').innerHTML = '<strong>TBD</strong><small>Second seed vs third seed</small>';
+      $('#tiebreakSlot').innerHTML = '<strong>None</strong><small>Auto-created only when points are tied around qualification spots.</small>';
+      $('#finalSlot').innerHTML = '<strong>TBD</strong><small>Winners of both semi-finals</small>';
+      $('#championSlot').innerHTML = '<strong>Not decided</strong><small>Record results to crown the winner.</small>';
+
+      if (!allRoundRobinFinished() || standings.length < 4) return;
+
+      const fourthPoints = standings[3].points;
+      const tiedForQualification = standings.filter(s => s.points === fourthPoints);
+      let qualified = standings.slice(0, 4);
+
+      if (tiedForQualification.length > 1 && tiedForQualification.some(t => standings.indexOf(t) >= 3)) {
+        const ids = tiedForQualification.map(t => t.id);
+        if (ids.length >= 2) {
+          const tieMatch = { id: 'tie-breaker', stage: 'Tie-break', teamA: ids[0], teamB: ids[1], winner: null };
+          appState.playoffs.push(tieMatch);
+          $('#tiebreakSlot').innerHTML = `<strong>${teamById(ids[0]).name} vs ${teamById(ids[1]).name}</strong><small>Winner takes the last qualifying seed.</small>`;
+          tieNotice.innerHTML = 'A tie affected qualification, so the app created a playoff before semi-finals.';
+        }
+      }
+
+      if (!appState.playoffs.find(p => p.stage === 'Tie-break' && !p.winner)) {
+        const semiTeams = qualified;
+        const semi1 = { id: 'semi-1', stage: 'Semi-final', teamA: semiTeams[0]?.id, teamB: semiTeams[3]?.id, winner: appState.playoffs.find(p => p.id === 'semi-1')?.winner || null };
+        const semi2 = { id: 'semi-2', stage: 'Semi-final', teamA: semiTeams[1]?.id, teamB: semiTeams[2]?.id, winner: appState.playoffs.find(p => p.id === 'semi-2')?.winner || null };
+        const final = { id: 'final', stage: 'Final', teamA: null, teamB: null, winner: appState.playoffs.find(p => p.id === 'final')?.winner || null };
+        appState.playoffs = [semi1, semi2, final];
+        $('#semi1').innerHTML = `<strong>${teamById(semi1.teamA).name} vs ${teamById(semi1.teamB).name}</strong><small>${teamById(semi1.teamA).players.join(' & ')} vs ${teamById(semi1.teamB).players.join(' & ')}</small>`;
+        $('#semi2').innerHTML = `<strong>${teamById(semi2.teamA).name} vs ${teamById(semi2.teamB).name}</strong><small>${teamById(semi2.teamA).players.join(' & ')} vs ${teamById(semi2.teamB).players.join(' & ')}</small>`;
+      }
+
+      const tieWinner = appState.playoffs.find(p => p.id === 'tie-breaker' && p.winner);
+      if (tieWinner) {
+        const replacement = tieWinner.winner;
+        qualified = standings.slice(0, 3).concat(standings.filter(s => s.id === replacement));
+        const semi1 = { id: 'semi-1', stage: 'Semi-final', teamA: qualified[0]?.id, teamB: qualified[3]?.id, winner: appState.playoffs.find(p => p.id === 'semi-1')?.winner || null };
+        const semi2 = { id: 'semi-2', stage: 'Semi-final', teamA: qualified[1]?.id, teamB: qualified[2]?.id, winner: appState.playoffs.find(p => p.id === 'semi-2')?.winner || null };
+        const final = appState.playoffs.find(p => p.id === 'final') || { id: 'final', stage: 'Final', teamA: null, teamB: null, winner: null };
+        appState.playoffs = [appState.playoffs.find(p => p.id === 'tie-breaker'), semi1, semi2, final];
+        $('#semi1').innerHTML = `<strong>${teamById(semi1.teamA).name} vs ${teamById(semi1.teamB).name}</strong><small>${teamById(semi1.teamA).players.join(' & ')} vs ${teamById(semi1.teamB).players.join(' & ')}</small>`;
+        $('#semi2').innerHTML = `<strong>${teamById(semi2.teamA).name} vs ${teamById(semi2.teamB).name}</strong><small>${teamById(semi2.teamA).players.join(' & ')} vs ${teamById(semi2.teamB).players.join(' & ')}</small>`;
+      }
+
+      const semi1 = appState.playoffs.find(p => p.id === 'semi-1');
+      const semi2 = appState.playoffs.find(p => p.id === 'semi-2');
+      const final = appState.playoffs.find(p => p.id === 'final');
+
+      if (semi1 && semi2 && semi1.winner && semi2.winner) {
+        final.teamA = semi1.winner;
+        final.teamB = semi2.winner;
+        $('#finalSlot').innerHTML = `<strong>${teamById(final.teamA).name} vs ${teamById(final.teamB).name}</strong><small>Final is ready to play.</small>`;
+      }
+      if (final && final.winner) {
+        $('#championSlot').innerHTML = `<strong>${teamById(final.winner).name}</strong><small>${teamById(final.winner).players.join(' & ')}</small>`;
+      }
+      renderPlayoffMatches();
+    }
+
+    function renderMatches() {
+      const list = $('#matchList');
+      list.innerHTML = '';
+      if (!appState.matches.length) {
+        list.innerHTML = '<div class="note">No fixtures yet. Admin needs to create the tournament.</div>';
+        $('#statMatches').textContent = '0';
+        return;
+      }
+      appState.matches.forEach((match, index) => {
+        const teamA = teamById(match.teamA), teamB = teamById(match.teamB);
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-header"><span class="pill">Match ${index + 1}</span><span style="font-size:var(--text-xs);color:var(--color-text-muted);">${match.stage}</span></div>
+          <div class="match-body">
+            <div class="team-badge"><strong>${teamA.name}</strong><span>${teamA.players.join(' & ')}</span></div>
+            <div class="vs">VS</div>
+            <div class="team-badge"><strong>${teamB.name}</strong><span>${teamB.players.join(' & ')}</span></div>
+          </div>
+          <div class="match-footer">
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}</div>
+            <div class="score-actions">
+              <button class="btn btn-secondary ${match.winner === match.teamA ? 'active-win' : ''}" data-result-match="${match.id}" data-winner="${match.teamA}">${teamA.name} won</button>
+              <button class="btn btn-secondary ${match.winner === match.teamB ? 'active-win' : ''}" data-result-match="${match.id}" data-winner="${match.teamB}">${teamB.name} won</button>
+            </div>
+          </div>`;
+        list.appendChild(card);
+      });
+      $('#statMatches').textContent = appState.matches.length + appState.playoffs.length;
+    }
+
+    function renderStandings() {
+      const body = $('#standingsBody');
+      const standings = buildStandings();
+      body.innerHTML = '';
+      if (!standings.length) {
+        body.innerHTML = '<tr><td colspan="7">No standings yet.</td></tr>';
+        return;
+      }
+      standings.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        const status = i < 4 ? '<span class="leader">Qualifying</span>' : '<span class="danger">Outside</span>';
+        tr.innerHTML = `<td>${i + 1}</td><td><strong>${row.name}</strong></td><td>${row.players.join(' & ')}</td><td>${row.played}</td><td>${row.wins}</td><td>${row.points}</td><td>${status}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderPlayoffMatches() {
+      const wrap = $('#playoffMatches');
+      wrap.innerHTML = '';
+      appState.playoffs.forEach(match => {
+        if (!match.teamA || !match.teamB) return;
+        const teamA = teamById(match.teamA), teamB = teamById(match.teamB);
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="match-header"><span class="pill">${match.stage}</span><span style="font-size:var(--text-xs);color:var(--color-text-muted);">Knockout</span></div>
+          <div class="match-body">
+            <div class="team-badge"><strong>${teamA.name}</strong><span>${teamA.players.join(' & ')}</span></div>
+            <div class="vs">VS</div>
+            <div class="team-badge"><strong>${teamB.name}</strong><span>${teamB.players.join(' & ')}</span></div>
+          </div>
+          <div class="match-footer">
+            <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}</div>
+            <div class="score-actions">
+              <button class="btn btn-secondary ${match.winner === match.teamA ? 'active-win' : ''}" data-playoff-match="${match.id}" data-winner="${match.teamA}">${teamA.name} won</button>
+              <button class="btn btn-secondary ${match.winner === match.teamB ? 'active-win' : ''}" data-playoff-match="${match.id}" data-winner="${match.teamB}">${teamB.name} won</button>
+            </div>
+          </div>`;
+        wrap.appendChild(card);
+      });
+      $('#statMatches').textContent = appState.matches.length + appState.playoffs.filter(p => p.teamA && p.teamB).length;
+    }
+
+    function renderAll() {
+      renderPlayers(); renderTeams(); renderMatches(); renderStandings(); refreshPlayoffs();
+      $('#adminPanel').classList.toggle('hidden', !document.getElementById('adminView').classList.contains('active') && !appState.adminLoggedIn);
+      $('#registrationPanel').classList.toggle('hidden', appState.tournamentCreated);
+      if (appState.adminLoggedIn) {
+        $('#adminPanel').classList.remove('hidden');
+        $('#adminLoginBlock').classList.add('hidden');
+        $('#adminActionsBlock').classList.remove('hidden');
+      } else {
+        $('#adminLoginBlock').classList.remove('hidden');
+        $('#adminActionsBlock').classList.add('hidden');
+      }
+    }
+
+    function generateTournament() {
+      if (appState.players.length < 4 || appState.players.length % 2 !== 0) {
+        toast('Use an even number of players, with at least 4 players.');
+        return;
+      }
+      const shuffledPlayers = shuffle(appState.players);
+      const shuffledNames = shuffle(TEAM_NAMES);
+      appState.teams = [];
+      for (let i = 0; i < shuffledPlayers.length; i += 2) {
+        appState.teams.push({ id: uid('team'), name: shuffledNames[i / 2] || `Team ${i/2 + 1}`, players: [shuffledPlayers[i], shuffledPlayers[i + 1]] });
+      }
+      appState.matches = createRoundRobin(appState.teams);
+      appState.playoffs = [];
+      appState.tournamentCreated = true;
+      toast('Tournament created. Teams and fixtures are ready.');
+      renderAll();
+    }
+
+    function setMatchWinner(id, winner, playoff=false) {
+      const collection = playoff ? appState.playoffs : appState.matches;
+      const match = collection.find(m => m.id === id);
+      if (!match) return;
+      match.winner = winner;
+      if (playoff && id !== 'final') {
+        const final = appState.playoffs.find(p => p.id === 'final');
+        const semi1 = appState.playoffs.find(p => p.id === 'semi-1');
+        const semi2 = appState.playoffs.find(p => p.id === 'semi-2');
+        if (final && semi1?.winner && semi2?.winner) {
+          final.teamA = semi1.winner; final.teamB = semi2.winner;
+        }
+      }
+      renderAll();
+    }
+
+    function loadDemo() {
+      appState.players = ['Rajat','Aman','Neha','Karan','Priya','Rohit','Simran','Ishaan','Megha','Dev','Ananya','Kabir'];
+      appState.adminLoggedIn = true;
+      appState.tournamentCreated = false;
+      generateTournament();
+      const firstThree = appState.matches.slice(0, 3);
+      firstThree.forEach((m, idx) => m.winner = idx % 2 === 0 ? m.teamA : m.teamB);
+      renderAll();
+      toast('Demo data loaded.');
+    }
+
+    document.addEventListener('click', e => {
+      const target = e.target.closest('button');
+      if (!target) return;
+      if (target.matches('[data-view-target]')) {
+        $$('[data-view-target]').forEach(btn => btn.classList.remove('active'));
+        target.classList.add('active');
+        $$('.view').forEach(v => v.classList.remove('active'));
+        $('#' + target.dataset.viewTarget).classList.add('active');
+        if (target.dataset.viewTarget === 'adminView') $('#adminPanel').classList.remove('hidden');
+        renderAll();
+      }
+      if (target.dataset.removePlayer !== undefined && !appState.tournamentCreated) {
+        appState.players.splice(Number(target.dataset.removePlayer), 1);
+        renderAll();
+      }
+      if (target.id === 'addPlayerBtn') {
+        const name = $('#playerName').value.trim();
+        if (!name) return toast('Enter a player name.');
+        if (appState.players.includes(name)) return toast('That player is already registered.');
+        appState.players.push(name);
+        $('#playerName').value = '';
+        renderAll();
+      }
+      if (target.id === 'adminLoginBtn') {
+        const user = $('#adminUser').value.trim();
+        const pass = $('#adminPass').value.trim();
+        if (user === ADMIN.username && pass === ADMIN.password) {
+          appState.adminLoggedIn = true; toast('Admin access granted.'); renderAll();
+        } else toast('Invalid admin credentials.');
+      }
+      if (target.id === 'logoutBtn') { appState.adminLoggedIn = false; renderAll(); }
+      if (target.id === 'generateTournamentBtn') { generateTournament(); }
+      if (target.id === 'shuffleTeamsBtn') {
+        if (!appState.adminLoggedIn) return toast('Admin login required.');
+        generateTournament();
+      }
+      if (target.id === 'clearResultsBtn') {
+        appState.matches.forEach(m => m.winner = null);
+        appState.playoffs.forEach(m => m.winner = null);
+        toast('All match results cleared.'); renderAll();
+      }
+      if (target.id === 'resetDemoBtn') loadDemo();
+      if (target.dataset.resultMatch) setMatchWinner(target.dataset.resultMatch, target.dataset.winner, false);
+      if (target.dataset.playoffMatch) setMatchWinner(target.dataset.playoffMatch, target.dataset.winner, true);
+      if (target.matches('[data-theme-toggle]')) switchTheme(appState.theme === 'dark' ? 'light' : 'dark');
+    });
+
+    document.addEventListener('change', e => {
+      const select = e.target.closest('[data-team-edit]');
+      if (!select) return;
+      const team = appState.teams.find(t => t.id === select.dataset.teamEdit);
+      if (!team) return;
+      team.players[Number(select.dataset.slot)] = select.value;
+      renderAll();
+    });
+
+    switchTheme(appState.theme);
+    renderAll();
+  </script>
+</body>
+</html>
