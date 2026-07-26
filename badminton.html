@@ -17,6 +17,7 @@
       --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #f3f0ec; --color-surface-dynamic: #e6e4df;
       --color-divider: #dcd9d5; --color-border: #d4d1ca; --color-text: #28251d; --color-text-muted: #6f6d67; --color-text-faint: #9d9a93; --color-text-inverse: #f9f8f4;
       --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8; --color-success: #437a22; --color-warning: #d19900; --color-error: #a12c7b; --color-blue: #006494; --color-purple: #7a39bb;
+      --color-gold: #b8860b; --color-silver: #6b7280; --color-bronze: #a15c2e;
       --radius-sm: 0.375rem; --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.25rem; --radius-full: 999px;
       --shadow-sm: 0 1px 2px rgba(40,37,29,.06); --shadow-md: 0 8px 24px rgba(40,37,29,.08); --shadow-lg: 0 18px 40px rgba(40,37,29,.12);
       --font-display: 'General Sans', 'Inter', sans-serif; --font-body: 'Satoshi', 'Inter', sans-serif;
@@ -26,11 +27,12 @@
       --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-surface-offset: #22211f; --color-surface-dynamic: #2d2c2a;
       --color-divider: #262523; --color-border: #393836; --color-text: #e5e2da; --color-text-muted: #a5a199; --color-text-faint: #74716b; --color-text-inverse: #1c1b19;
       --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b; --color-success: #6daa45; --color-warning: #e8af34; --color-error: #d163a7; --color-blue: #5591c7; --color-purple: #a86fdf;
+      --color-gold: #e0b23a; --color-silver: #b7bdc7; --color-bronze: #d3874c;
       --shadow-sm: 0 1px 2px rgba(0,0,0,.22); --shadow-md: 0 8px 24px rgba(0,0,0,.28); --shadow-lg: 0 18px 40px rgba(0,0,0,.4);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { min-height: 100vh; font-family: var(--font-body); font-size: var(--text-base); line-height: 1.6; background: radial-gradient(circle at top right, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 34%), var(--color-bg); color: var(--color-text); }
+    body { min-height: 100vh; font-family: var(--font-body); font-size: var(--text-base); line-height: 1.6; background: radial-gradient(circle at top right, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 34%), radial-gradient(circle at 8% 92%, color-mix(in srgb, var(--color-purple) 8%, transparent), transparent 40%), var(--color-bg); color: var(--color-text); }
     img, svg { display: block; max-width: 100%; }
     button, input, select { font: inherit; color: inherit; }
     button { border: none; cursor: pointer; transition: transform var(--transition), background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition); }
@@ -50,23 +52,24 @@
     .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
     .icon-btn, .btn { min-height: 44px; padding: 0.8rem 1rem; border-radius: var(--radius-md); }
     .icon-btn { width: 44px; padding: 0; border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); background: var(--color-surface); display: grid; place-items: center; }
-    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); box-shadow: var(--shadow-sm); }
-    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-inverse); box-shadow: var(--shadow-sm); }
+    .btn-primary:hover { box-shadow: var(--shadow-md); }
     .btn-secondary { background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
     .btn-danger { background: color-mix(in srgb, var(--color-error) 14%, var(--color-surface)); color: var(--color-error); border: 1px solid color-mix(in srgb, var(--color-error) 28%, transparent); }
-    .btn-success { background: var(--color-success); color: white; }
-    .btn-success:hover { background: color-mix(in srgb, var(--color-success) 80%, black); }
+    .btn-success { background: linear-gradient(135deg, var(--color-success), color-mix(in srgb, var(--color-success) 75%, black)); color: white; box-shadow: var(--shadow-sm); }
+    .btn-success:hover { box-shadow: var(--shadow-md); }
     .btn-warning { background: var(--color-warning); color: white; }
     .btn-warning:hover { background: color-mix(in srgb, var(--color-warning) 80%, black); }
     .hero { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-6); align-items: stretch; margin-bottom: var(--space-6); }
-    .panel { background: color-mix(in srgb, var(--color-surface) 88%, transparent); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
+    .panel { background: color-mix(in srgb, var(--color-surface) 88%, transparent); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); transition: box-shadow var(--transition); }
     .hero-copy, .hero-side, .section { padding: var(--space-6); }
     .eyebrow { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: var(--space-4); padding: .4rem .8rem; background: var(--color-primary-highlight); color: var(--color-primary); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .hero-copy h2 { font: 700 var(--text-xl)/1.05 var(--font-display); max-width: 12ch; margin-bottom: var(--space-4); }
+    .hero-copy h2 { font: 700 var(--text-xl)/1.05 var(--font-display); max-width: 12ch; margin-bottom: var(--space-4); background: linear-gradient(135deg, var(--color-text), var(--color-primary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .hero-copy p { max-width: 58ch; color: var(--color-text-muted); margin-bottom: var(--space-5); }
     .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
-    .stat { background: var(--color-surface-2); border-radius: var(--radius-lg); padding: var(--space-4); border: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); }
-    .stat strong { display: block; font: 700 var(--text-lg)/1 var(--font-display); margin-bottom: .3rem; }
+    .stat { background: var(--color-surface-2); border-radius: var(--radius-lg); padding: var(--space-4); border: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); transition: transform var(--transition), box-shadow var(--transition); }
+    .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .stat strong { display: block; font: 700 var(--text-lg)/1 var(--font-display); margin-bottom: .3rem; color: var(--color-primary); }
     .stat span { font-size: var(--text-xs); color: var(--color-text-muted); }
     .hero-side { display: grid; gap: var(--space-4); }
     .match-visual { display: grid; gap: var(--space-3); }
@@ -87,20 +90,24 @@
     .inline > * { flex: 1 1 140px; }
     .card-list { display: grid; gap: var(--space-3); }
     .player-item, .team-item, .match-card, .standing-row, .bracket-card, .note, .tabbar { background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); border-radius: var(--radius-lg); }
-    .player-item, .team-item, .standing-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: .8rem 1rem; }
+    .player-item, .team-item, .standing-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: .8rem 1rem; transition: box-shadow var(--transition), transform var(--transition); }
+    .player-item:hover, .team-item:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
     .pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .7rem; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary); }
     .note { padding: 1rem; color: var(--color-text-muted); }
     .tabbar { display: flex; flex-wrap: wrap; padding: .4rem; gap: .4rem; }
     .tabbar button { flex: 1 1 140px; min-height: 42px; border-radius: 12px; color: var(--color-text-muted); }
-    .tabbar button.active { background: var(--color-primary); color: var(--color-text-inverse); }
+    .tabbar button.active { background: var(--color-primary); color: var(--color-text-inverse); box-shadow: var(--shadow-sm); }
     .view { display: none; }
-    .view.active { display: block; }
+    .view.active { display: block; animation: fadeIn 220ms ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
     .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
     .matches { display: grid; gap: var(--space-4); }
-    .match-card { padding: var(--space-4); }
+    .match-card { padding: var(--space-4); transition: box-shadow var(--transition), transform var(--transition); }
+    .match-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .match-header, .match-footer { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
     .match-body { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-3); padding: var(--space-4) 0; }
-    .team-badge { padding: 1rem; border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
+    .team-badge { padding: 1rem; border-radius: var(--radius-lg); background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); transition: border-color var(--transition); }
+    .team-badge.is-winner { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface)); }
     .team-badge strong { display: block; margin-bottom: .3rem; }
     .vs { font: 700 var(--text-lg)/1 var(--font-display); color: var(--color-text-faint); }
     .score-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
@@ -109,20 +116,33 @@
     table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums lining-nums; }
     th, td { text-align: left; padding: .9rem .8rem; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); }
     th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted); }
+    tbody tr { transition: background var(--transition); }
+    tbody tr.row-qualified { background: color-mix(in srgb, var(--color-success) 7%, transparent); }
+    tbody tr.row-qf { background: color-mix(in srgb, var(--color-purple) 7%, transparent); }
+    tbody tr.row-eliminated { opacity: .72; }
+    tbody tr:hover { background: color-mix(in srgb, var(--color-primary) 6%, transparent); }
     .leader { color: var(--color-success); font-weight: 700; }
     .danger { color: var(--color-error); }
+    .rank-badge { display: inline-flex; align-items:center; justify-content:center; width: 1.9rem; height: 1.9rem; border-radius: 50%; font-weight: 700; font-size: var(--text-sm); color: white; }
+    .rank-1 { background: linear-gradient(135deg, var(--color-gold), color-mix(in srgb, var(--color-gold) 70%, black)); }
+    .rank-2 { background: linear-gradient(135deg, var(--color-silver), color-mix(in srgb, var(--color-silver) 70%, black)); }
+    .rank-3 { background: linear-gradient(135deg, var(--color-bronze), color-mix(in srgb, var(--color-bronze) 70%, black)); }
+    .rank-other { background: color-mix(in srgb, var(--color-text) 25%, var(--color-surface-2)); color: var(--color-text-muted); }
     .bracket { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
     .bracket-col { display: grid; gap: var(--space-3); }
-    .bracket-card { padding: var(--space-3); min-height: 100px; }
+    .bracket-card { padding: var(--space-3); min-height: 100px; transition: box-shadow var(--transition); }
+    .bracket-card:hover { box-shadow: var(--shadow-sm); }
     .bracket-card h4 { font-size: var(--text-xs); margin-bottom: .5rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; }
     .slot { padding: .6rem; border-radius: 10px; background: var(--color-surface); border: 1px dashed color-mix(in srgb, var(--color-text) 14%, transparent); margin-bottom: .5rem; font-size: var(--text-sm); }
+    .slot.slot-decided { border-style: solid; border-color: color-mix(in srgb, var(--color-success) 40%, transparent); background: color-mix(in srgb, var(--color-success) 6%, var(--color-surface)); }
     .slot strong { display:block; }
     .slot small { color: var(--color-text-muted); font-size: var(--text-xs); }
     .admin-lock { display: grid; gap: var(--space-4); }
     .hidden { display:none !important; }
     .footer-note { text-align: center; color: var(--color-text-muted); padding: var(--space-8) 0 var(--space-4); font-size: var(--text-sm); }
     .toast-wrap { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 10px; z-index: 40; }
-    .toast { background: var(--color-text); color: var(--color-text-inverse); padding: .85rem 1rem; border-radius: 14px; box-shadow: var(--shadow-lg); min-width: 240px; }
+    .toast { background: var(--color-text); color: var(--color-text-inverse); padding: .85rem 1rem; border-radius: 14px; box-shadow: var(--shadow-lg); min-width: 240px; animation: slideIn 220ms ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(12px);} to { opacity: 1; transform: translateX(0);} }
     .group-badge { background: var(--color-primary-highlight); color: var(--color-primary); border-radius: var(--radius-full); padding: .2rem .9rem; font-size: var(--text-xs); font-weight: 700; }
     .add-player-row { display: flex; gap: var(--space-3); align-items: center; }
     .add-player-row input { flex: 1; }
@@ -137,6 +157,11 @@
     .stage-qf { background: var(--color-purple); color: white; }
     .stage-semi { background: var(--color-blue); color: white; }
     .stage-final { background: var(--color-warning); color: white; }
+    .status-pill { display: inline-flex; align-items: center; gap: .3rem; font-size: var(--text-xs); font-weight: 700; padding: .3rem .7rem; border-radius: var(--radius-full); }
+    .status-pill.qualified { background: color-mix(in srgb, var(--color-success) 16%, transparent); color: var(--color-success); }
+    .status-pill.qf { background: color-mix(in srgb, var(--color-purple) 16%, transparent); color: var(--color-purple); }
+    .status-pill.out { background: color-mix(in srgb, var(--color-error) 14%, transparent); color: var(--color-error); }
+    .status-pill.pending { background: var(--color-surface-offset); color: var(--color-text-muted); }
     @media (max-width: 1080px) { .hero, .layout, .grid-2, .bracket { grid-template-columns: 1fr; } .hero-copy h2 { max-width: 16ch; } }
     @media (max-width: 680px) { .app { padding: .8rem; } .topbar { align-items: flex-start; flex-direction: column; } .stat-grid { grid-template-columns: 1fr; } .match-body { grid-template-columns: 1fr; } .vs { text-align:center; } .hero-copy, .hero-side, .section { padding: var(--space-5); } .add-player-row { flex-direction: column; } }
   </style>
@@ -164,16 +189,16 @@
         <button class="icon-btn" data-theme-toggle aria-label="Switch theme">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <button class="btn btn-secondary" id="resetDemoBtn">Reset Demo</button>
+        <button class="btn btn-secondary" id="resetDemoBtn">Reset All</button>
       </div>
     </header>
 
     <main id="main">
       <section class="hero">
         <div class="panel hero-copy">
-          <span class="eyebrow">QF for Tied Teams · Top 3 to Semis</span>
+          <span class="eyebrow">Top 4 → Semis · Tie for 4th → QF</span>
           <h2>Badminton Tournament Manager</h2>
-          <p>Top 3 → Direct to Semis | Tied for 4th → Quarter-finals</p>
+          <p>Ranks 1–4 qualify straight to the Semi-finals. If two or more teams are tied on points for 4th place, those tied teams play a Quarter-final to settle the last semi-final spot.</p>
           <div class="stat-grid">
             <div class="stat"><strong id="statPlayers">0</strong><span>Players</span></div>
             <div class="stat"><strong id="statTeams">0</strong><span>Teams</span></div>
@@ -185,7 +210,7 @@
             <div class="court" aria-hidden="true">
               <div class="player-dot p1"></div><div class="player-dot p2"></div><div class="player-dot p3"></div><div class="player-dot p4"></div><div class="shuttle"></div>
             </div>
-            <div class="note">🏆 <strong>Logic:</strong> Top 3 → Semis | Tied for 4th → QF</div>
+            <div class="note">🏆 <strong>Logic:</strong> Top 4 → Semis, unless tied on points for 4th → those tied teams play QF instead</div>
           </div>
         </div>
       </section>
@@ -256,13 +281,13 @@
         <section class="main">
           <div id="homeView" class="view active">
             <section class="panel section">
-              <h3>Today's Teams</h3>
+              <h3>Teams</h3>
               <div id="homeTeamList" class="card-list"></div>
               <div class="scoring-rule">
                 📊 <strong>Scoring:</strong> Win = <strong>+2</strong> points | Loss = <strong>-1</strong> point
               </div>
               <div class="help-text" style="margin-top:1rem;">
-                <strong>Tournament Flow:</strong> Top 3 → Semis | Tied for 4th → QF
+                <strong>Tournament Flow:</strong> Top 4 → Semis | Tied for 4th → QF
               </div>
             </section>
           </div>
@@ -331,32 +356,13 @@
 
   <script>
     // ----- STATE -----
-    const STORAGE_KEY = "badminton_tournament_final_v2";
+    const STORAGE_KEY = "badminton_tournament_final_v4";
 
-    // ----- YOUR EXACT 18 PLAYERS -----
-    const TODAY_PLAYERS = [
-      'srinidhi', 'mohan', 'sabrish', 'Kishore', 'niranjan', 'mahesh',
-      'ashish', 'moneish', 'tarak', 'amar', 'parkodi', 'gaurav',
-      'rajat', 'amirth', 'pavan', 'chandu', 'naresh', 'balaji'
-    ];
-
-    // ----- YOUR EXACT 9 TEAMS -----
-    const TODAY_TEAMS = [
-      { id: 'team-1', name: 'Stormbreakers', players: ['srinidhi', 'mohan'], group: null },
-      { id: 'team-2', name: 'Asgardians', players: ['sabrish', 'Kishore'], group: null },
-      { id: 'team-3', name: 'Guardians', players: ['niranjan', 'mahesh'], group: null },
-      { id: 'team-4', name: 'Vibranium Vipers', players: ['ashish', 'moneish'], group: null },
-      { id: 'team-5', name: 'Wakanda Wings', players: ['tarak', 'amar'], group: null },
-      { id: 'team-6', name: 'Crimson Falcons', players: ['parkodi', 'gaurav'], group: null },
-      { id: 'team-7', name: 'Nova Racquets', players: ['rajat', 'amirth'], group: null },
-      { id: 'team-8', name: 'Mystic Hawks', players: ['pavan', 'chandu'], group: null },
-      { id: 'team-9', name: 'Newproduct', players: ['naresh', 'balaji'], group: null }
-    ];
-
+    // No pre-loaded players/teams — start fresh and let the user build their own list.
     const TEAM_NAMES = ['Avengers','Thunderbolts','Guardians','Asgardians','Vibranium Vipers','Wakanda Wings','Quantum Smash','Stormbreakers','Nova Racquets','Infinity Shuttlers','Web Warriors','Crimson Falcons','Mystic Hawks','Iron Rallies','Celestial Drops','Phoenix Fire','Shadow Wolves','Golden Eagles','Silver Lions','Diamond Dragons'];
 
     let appState = {
-      players: [...TODAY_PLAYERS],
+      players: [],
       teams: [],
       matches: [],
       playoffs: [],
@@ -372,6 +378,8 @@
     function shuffle(arr) { const c=[...arr]; for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];} return c; }
     function toast(msg) { const d=document.createElement('div'); d.className='toast'; d.textContent=msg; $('#toastWrap').appendChild(d); setTimeout(()=>d.remove(),2600); }
     function teamById(id) { return appState.teams.find(t=>t.id===id) || { name:'TBD', players:[], group:'' }; }
+    function rankBadgeClass(i) { return i===0 ? 'rank-1' : i===1 ? 'rank-2' : i===2 ? 'rank-3' : 'rank-other'; }
+    function rankMedal(i) { return i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : ''; }
 
     // ----- PERSISTENCE -----
     function saveState() {
@@ -382,7 +390,7 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          appState.players = parsed.players || [...TODAY_PLAYERS];
+          appState.players = parsed.players || [];
           appState.teams = parsed.teams || [];
           appState.matches = parsed.matches || [];
           appState.playoffs = parsed.playoffs || [];
@@ -407,9 +415,30 @@
     }
 
     // ----- TEAM GENERATION -----
+    // Pairs up the current player list into teams. Existing pairings are kept
+    // stable where possible (teams rebuild only when the player list changes);
+    // use "Reshuffle All Teams" in Admin to fully randomize instead.
     function generateTeams() {
-      const teams = TODAY_TEAMS.map(t => ({ ...t, id: uid('team') }));
-      
+      if (appState.players.length < 2) {
+        appState.teams = [];
+        appState.matches = [];
+        appState.playoffs = [];
+        return;
+      }
+
+      const usedNames = shuffle([...TEAM_NAMES]);
+      const teams = [];
+      for (let i = 0; i < appState.players.length; i += 2) {
+        if (i + 1 < appState.players.length) {
+          teams.push({
+            id: uid('team'),
+            name: usedNames[i / 2] || `Team ${i / 2 + 1}`,
+            players: [appState.players[i], appState.players[i + 1]],
+            group: null
+          });
+        }
+      }
+
       const shuffledTeams = shuffle(teams);
       const half = Math.ceil(shuffledTeams.length / 2);
       shuffledTeams.forEach((t, idx) => {
@@ -500,6 +529,25 @@
       return appState.matches.length && appState.matches.every(m => !!m.winner);
     }
 
+    // Shared helper: works out qualification state from standings.
+    // Returns { hasTie, tiedCount, fourthPlace } so the bracket logic and the
+    // standings table always agree on who qualifies.
+    function getQualificationInfo(standings) {
+      const fourthPlace = standings.length >= 4 ? standings[3] : null;
+      const fifthPlace = standings.length >= 5 ? standings[4] : null;
+      const hasTie = !!(fourthPlace && fifthPlace && fourthPlace.points === fifthPlace.points);
+      const tiedCount = hasTie ? standings.filter(t => t.points === fourthPlace.points).length : 0;
+      return { fourthPlace, fifthPlace, hasTie, tiedCount };
+    }
+
+    // Returns 'qualified' | 'qf' | 'eliminated' | 'pending' for standings row i
+    function statusForRank(i, standings, info) {
+      if (i < 3) return 'qualified'; // ranks 1-3 always go straight through
+      if (i === 3) return info.hasTie ? 'qf' : 'qualified'; // rank 4: QF only if tied with 5th
+      if (info.hasTie && i < 3 + info.tiedCount) return 'qf'; // rest of the tied group
+      return 'eliminated';
+    }
+
     // ----- CORRECT KNOCKOUT LOGIC -----
     function generatePlayoffs() {
       appState.playoffs = [];
@@ -509,22 +557,16 @@
         return;
       }
 
-      // Top 3 go directly to Semis
+      const info = getQualificationInfo(standings);
       const top3 = standings.slice(0, 3);
-      
-      // Check for tie for 4th place
-      const fourthPlace = standings.length >= 4 ? standings[3] : null;
-      const fifthPlace = standings.length >= 5 ? standings[4] : null;
       
       let qfMatches = [];
       let semiTeams = [...top3];
-      let qfWinner = null;
       let byeTeam = null;
       
-      // Check if 4th and 5th have same points (tie for 4th)
-      if (fourthPlace && fifthPlace && fourthPlace.points === fifthPlace.points) {
+      if (info.hasTie) {
         // Get all teams tied for 4th
-        const fourthPoints = fourthPlace.points;
+        const fourthPoints = info.fourthPlace.points;
         const tiedTeams = standings.filter(t => t.points === fourthPoints);
         
         // All tied teams go to QF
@@ -568,7 +610,7 @@
           }
         }
         
-        toast(`🏅 ${qfMatches.length} Quarter-final matches created! (Tie for 4th place)`);
+        toast(`🏅 ${qfMatches.length} Quarter-final match(es) created! (Tie for 4th place)`);
       } else {
         // No tie - top 4 go directly to Semis
         const top4 = standings.slice(0, 4);
@@ -658,15 +700,14 @@
         list.innerHTML = '<div class="note">No players. Add some above!</div>'; 
       } else {
         appState.players.forEach((name, idx) => {
-          const isTodayPlayer = TODAY_PLAYERS.includes(name);
           const row = document.createElement('div');
           row.className = 'player-item';
           row.innerHTML = `
             <div>
               <strong>${name}</strong>
-              <div style="font-size:var(--text-xs);color:var(--color-text-muted);">#${idx+1} ${isTodayPlayer ? '⭐ Today\'s player' : '🆕 New'}</div>
+              <div style="font-size:var(--text-xs);color:var(--color-text-muted);">#${idx+1}</div>
             </div>
-            <button class="btn btn-secondary" data-remove-player="${idx}" ${(isLocked || isTodayPlayer) ? 'disabled style="opacity:0.4;"' : ''}>
+            <button class="btn btn-secondary" data-remove-player="${idx}" ${isLocked ? 'disabled style="opacity:0.4;"' : ''}>
               Remove
             </button>
           `;
@@ -728,14 +769,9 @@
           card.className = 'team-item';
           const groupLabel = team.group ? `Group ${team.group}` : '';
           
-          const isTodayTeam = TODAY_TEAMS.some(t => 
-            t.players[0] === team.players[0] && t.players[1] === team.players[1]
-          );
-          
           card.innerHTML = `
             <div>
               <span class="pill">${groupLabel}</span>
-              ${isTodayTeam ? '<span style="font-size:var(--text-xs);color:var(--color-success);">⭐ Today</span>' : '<span style="font-size:var(--text-xs);color:var(--color-purple);">🆕 New</span>'}
               <strong style="display:block;margin-top:.5rem;">${team.name}</strong>
               <div style="font-size:var(--text-sm);color:var(--color-text-muted);">${team.players.join(' & ')}</div>
             </div>
@@ -784,12 +820,12 @@
               <span style="font-size:var(--text-xs);color:var(--color-text-muted);">${match.group ? `Group ${match.group}` : ''}</span>
             </div>
             <div class="match-body">
-              <div class="team-badge">
+              <div class="team-badge ${match.winner === match.teamA ? 'is-winner' : ''}">
                 <strong>${tA.name}</strong>
                 <span>${tA.players.join(' & ')}</span>
               </div>
               <div class="vs">VS</div>
-              <div class="team-badge">
+              <div class="team-badge ${match.winner === match.teamB ? 'is-winner' : ''}">
                 <strong>${tB.name}</strong>
                 <span>${tB.players.join(' & ')}</span>
               </div>
@@ -821,70 +857,49 @@
       const standings = buildStandings();
       body.innerHTML = '';
       if (!standings.length) { body.innerHTML = '<tr><td colspan="10">No standings yet.</td></tr>'; return; }
-      
-      if (allGroupMatchesFinished() && appState.tournamentStarted) {
-        const top3 = standings.slice(0, 3);
-        const fourthPlace = standings.length >= 4 ? standings[3] : null;
-        const fifthPlace = standings.length >= 5 ? standings[4] : null;
-        const hasTie = fourthPlace && fifthPlace && fourthPlace.points === fifthPlace.points;
-        
-        standings.forEach((row, i) => {
-          const tr = document.createElement('tr');
-          let status = '—';
-          
-          if (i < 3) {
-            status = '<span class="leader">✅ Direct to Semis</span>';
-          } else if (hasTie && i >= 3 && i < 3 + (standings.filter(t => t.points === fourthPlace.points).length)) {
-            status = '<span class="leader">🔶 Quarter-final (tie for 4th)</span>';
+
+      const groupStageDone = allGroupMatchesFinished() && appState.tournamentStarted;
+      const info = groupStageDone ? getQualificationInfo(standings) : null;
+
+      standings.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        let status;
+
+        if (groupStageDone) {
+          const state = statusForRank(i, standings, info);
+          if (state === 'qualified') {
+            status = '<span class="status-pill qualified">✅ Direct to Semis</span>';
+            tr.className = 'row-qualified';
+          } else if (state === 'qf') {
+            status = '<span class="status-pill qf">🔶 Quarter-final (tie for 4th)</span>';
+            tr.className = 'row-qf';
           } else {
-            status = '<span class="danger">❌ Eliminated</span>';
+            status = '<span class="status-pill out">❌ Eliminated</span>';
+            tr.className = 'row-eliminated';
           }
-          
-          const grp = row.group || '—';
-          const isTodayTeam = TODAY_TEAMS.some(t => 
-            t.players[0] === row.players[0] && t.players[1] === row.players[1]
-          );
-          const todayBadge = isTodayTeam ? '⭐' : '🆕';
-          
-          tr.innerHTML = `
-            <td>${i+1}</td>
-            <td><strong>${row.name}</strong> ${todayBadge}</td>
-            <td>${grp}</td>
-            <td>${row.players.join(' & ')}</td>
-            <td>${row.played}</td>
-            <td>${row.wins}</td>
-            <td>${row.losses}</td>
-            <td>${row.diff}</td>
-            <td><strong>${row.points}</strong></td>
-            <td>${status}</td>
-          `;
-          body.appendChild(tr);
-        });
-      } else {
-        standings.forEach((row, i) => {
-          const tr = document.createElement('tr');
-          const status = appState.tournamentStarted ? '⏳ In progress' : '—';
-          const grp = row.group || '—';
-          const isTodayTeam = TODAY_TEAMS.some(t => 
-            t.players[0] === row.players[0] && t.players[1] === row.players[1]
-          );
-          const todayBadge = isTodayTeam ? '⭐' : '🆕';
-          
-          tr.innerHTML = `
-            <td>${i+1}</td>
-            <td><strong>${row.name}</strong> ${todayBadge}</td>
-            <td>${grp}</td>
-            <td>${row.players.join(' & ')}</td>
-            <td>${row.played}</td>
-            <td>${row.wins}</td>
-            <td>${row.losses}</td>
-            <td>${row.diff}</td>
-            <td><strong>${row.points}</strong></td>
-            <td>${status}</td>
-          `;
-          body.appendChild(tr);
-        });
-      }
+        } else {
+          status = appState.tournamentStarted
+            ? '<span class="status-pill pending">⏳ In progress</span>'
+            : '<span class="status-pill pending">—</span>';
+        }
+
+        const grp = row.group || '—';
+        const medal = rankMedal(i);
+        
+        tr.innerHTML += `
+          <td><span class="rank-badge ${rankBadgeClass(i)}">${medal || (i+1)}</span></td>
+          <td><strong>${row.name}</strong></td>
+          <td>${grp}</td>
+          <td>${row.players.join(' & ')}</td>
+          <td>${row.played}</td>
+          <td>${row.wins}</td>
+          <td>${row.losses}</td>
+          <td>${row.diff}</td>
+          <td><strong>${row.points}</strong></td>
+          <td>${status}</td>
+        `;
+        body.appendChild(tr);
+      });
     }
 
     function renderBracket() {
@@ -905,8 +920,10 @@
         const tA = teamById(match.teamA);
         const tB = teamById(match.teamB);
         const winnerText = match.winner ? `✅ Winner: ${teamById(match.winner).name}` : '⏳ Not played';
+        qf1Slot.className = 'slot' + (match.winner ? ' slot-decided' : '');
         qf1Slot.innerHTML = `<strong>${tA.name} vs ${tB.name}</strong><small>${tA.players.join(' & ')} vs ${tB.players.join(' & ')}<br>${winnerText}</small>`;
       } else {
+        qf1Slot.className = 'slot';
         qf1Slot.innerHTML = '<strong>No QF needed</strong><small>No tie for 4th place</small>';
       }
       
@@ -928,6 +945,7 @@
             }
           }
           
+          slot.className = 'slot' + (match.winner ? ' slot-decided' : '');
           if (teams.length === 2) {
             const winnerText = match.winner ? `✅ Winner: ${teamById(match.winner).name}` : '⏳ Not played';
             slot.innerHTML = `<strong>${teams[0].name} vs ${teams[1].name}</strong><small>${teams[0].players.join(' & ')} vs ${teams[1].players.join(' & ')}<br>${winnerText}</small>`;
@@ -945,6 +963,7 @@
             slot.innerHTML = '<strong>TBD</strong><small>Waiting for teams</small>';
           }
         } else {
+          slot.className = 'slot';
           slot.innerHTML = '<strong>No Semi-final</strong><small>Not enough teams</small>';
         }
       });
@@ -953,12 +972,17 @@
       if (finalMatch) {
         if (finalMatch.winner) {
           const champ = teamById(finalMatch.winner);
+          championSlot.className = 'slot slot-decided';
           championSlot.innerHTML = `<strong>👑 ${champ.name}</strong><small>${champ.players.join(' & ')}</small>`;
+        } else {
+          championSlot.className = 'slot';
+          championSlot.innerHTML = '<strong>Not decided</strong>';
         }
         const teams = [];
         if (finalMatch.teamA) teams.push(teamById(finalMatch.teamA));
         if (finalMatch.teamB) teams.push(teamById(finalMatch.teamB));
         
+        finalSlot.className = 'slot' + (finalMatch.winner ? ' slot-decided' : '');
         if (teams.length >= 2) {
           const names = teams.map(t => t.name).join(' vs ');
           const winnerText = finalMatch.winner ? `✅ Champion: ${teamById(finalMatch.winner).name}` : '⏳ Not played';
@@ -971,11 +995,9 @@
       // Update notice
       if (allGroupMatchesFinished() && appState.tournamentStarted) {
         const standings = buildStandings();
-        const fourthPlace = standings.length >= 4 ? standings[3] : null;
-        const fifthPlace = standings.length >= 5 ? standings[4] : null;
-        const hasTie = fourthPlace && fifthPlace && fourthPlace.points === fifthPlace.points;
+        const info = getQualificationInfo(standings);
         
-        if (hasTie) {
+        if (info.hasTie) {
           tieNotice.innerHTML = `🏆 Group stage complete! Tie for 4th place → Quarter-final needed!`;
         } else {
           tieNotice.innerHTML = `🏆 Group stage complete! Top 4 teams qualify directly to Semi-finals.`;
@@ -1001,13 +1023,14 @@
         const tA = teamById(match.teamA), tB = teamById(match.teamB);
         const card = document.createElement('div');
         card.className = 'match-card';
+        const stageClass = match.type === 'qf' ? 'stage-qf' : match.type === 'semi' ? 'stage-semi' : 'stage-final';
         const stageLabel = match.type === 'qf' ? '🏅 Quarter-final' : match.type === 'semi' ? '🏅 Semi-final' : '🏆 Final';
         card.innerHTML = `
-          <div class="match-header"><span class="pill">${stageLabel}</span></div>
+          <div class="match-header"><span class="stage-badge ${stageClass}">${stageLabel}</span></div>
           <div class="match-body">
-            <div class="team-badge"><strong>${tA.name}</strong><span>${tA.players.join(' & ')}</span></div>
+            <div class="team-badge ${match.winner === match.teamA ? 'is-winner' : ''}"><strong>${tA.name}</strong><span>${tA.players.join(' & ')}</span></div>
             <div class="vs">VS</div>
-            <div class="team-badge"><strong>${tB.name}</strong><span>${tB.players.join(' & ')}</span></div>
+            <div class="team-badge ${match.winner === match.teamB ? 'is-winner' : ''}"><strong>${tB.name}</strong><span>${tB.players.join(' & ')}</span></div>
           </div>
           <div class="match-footer">
             <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Winner: ${match.winner ? teamById(match.winner).name : 'Not recorded'}</div>
@@ -1034,9 +1057,6 @@
       }
       
       appState.teams.forEach((team) => {
-        const isTodayTeam = TODAY_TEAMS.some(t => 
-          t.players[0] === team.players[0] && t.players[1] === team.players[1]
-        );
         const editCard = document.createElement('div');
         editCard.className = 'match-card';
         const groupLabel = team.group ? `Group ${team.group}` : '';
@@ -1044,23 +1064,21 @@
           <div class="match-header">
             <strong>${team.name}</strong>
             <span class="pill">${groupLabel}</span>
-            ${isTodayTeam ? '<span style="font-size:var(--text-xs);color:var(--color-success);">⭐ Today\'s team (locked)</span>' : '<span style="font-size:var(--text-xs);color:var(--color-purple);">🆕 New team</span>'}
           </div>
           <div class="grid-2" style="margin-top:1rem;">
             <div class="field">
               <label>Player 1</label>
-              <select data-team-edit="${team.id}" data-slot="0" ${isTodayTeam ? 'disabled' : ''}>
+              <select data-team-edit="${team.id}" data-slot="0">
                 ${appState.players.map(p => `<option value="${p}" ${p === team.players[0] ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </div>
             <div class="field">
               <label>Player 2</label>
-              <select data-team-edit="${team.id}" data-slot="1" ${isTodayTeam ? 'disabled' : ''}>
+              <select data-team-edit="${team.id}" data-slot="1">
                 ${appState.players.map(p => `<option value="${p}" ${p === team.players[1] ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </div>
           </div>
-          ${isTodayTeam ? '<div class="help-text">⭐ Today\'s teams are locked. Only new teams can be edited.</div>' : ''}
         `;
         edit.appendChild(editCard);
       });
@@ -1071,8 +1089,8 @@
       renderTeams('teamList', true);
       renderHomeTeams();
       renderMatches();
-      renderStandings();
       generatePlayoffs();
+      renderStandings();
       renderBracket();
       renderPlayoffMatches();
       renderTeamEditor();
@@ -1212,10 +1230,6 @@
         }
         const idx = Number(target.dataset.removePlayer);
         const name = appState.players[idx];
-        if (TODAY_PLAYERS.includes(name)) {
-          toast('Cannot remove today\'s players! They are locked.');
-          return;
-        }
         appState.players.splice(idx, 1);
         generateTeams();
         renderAll();
@@ -1264,13 +1278,13 @@
       }
       
       if (target.id === 'resetDemoBtn') {
-        appState.players = [...TODAY_PLAYERS];
+        appState.players = [];
         appState.teams = [];
         appState.matches = [];
         appState.playoffs = [];
         appState.tournamentStarted = false;
-        generateTeams();
-        toast('Reset to today\'s 9 teams and 18 players.');
+        appState.adminLoggedIn = false;
+        toast('Reset. Add players to start a new tournament.');
         renderAll();
       }
       
@@ -1362,14 +1376,6 @@
       const team = appState.teams.find(t => t.id === select.dataset.teamEdit);
       if (!team) return;
       
-      const isTodayTeam = TODAY_TEAMS.some(t => 
-        t.players[0] === team.players[0] && t.players[1] === team.players[1]
-      );
-      if (isTodayTeam) {
-        toast('Today\'s teams are locked! Cannot edit them.');
-        return;
-      }
-      
       team.players[Number(select.dataset.slot)] = select.value;
       renderAll();
       toast(`Team "${team.name}" updated.`);
@@ -1377,11 +1383,7 @@
 
     // ----- INIT -----
     (function init() {
-      const loaded = loadState();
-      if (!loaded || !appState.teams.length) {
-        appState.players = [...TODAY_PLAYERS];
-        generateTeams();
-      }
+      loadState();
       switchTheme(appState.theme);
       renderAll();
     })();
