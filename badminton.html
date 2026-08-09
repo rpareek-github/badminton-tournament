@@ -78,6 +78,8 @@
     .inline > * { flex: 1 1 140px; }
     .card-list { display: grid; gap: var(--space-3); }
     .player-item, .team-item, .match-card, .note, .tabbar { background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); border-radius: var(--radius-lg); }
+    .format-choice { border: 2px solid color-mix(in srgb, var(--color-text) 8%, transparent); transition: border-color var(--transition), background var(--transition); }
+    .format-choice.active { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-2)); }
     .player-item, .team-item { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: .8rem 1rem; transition: box-shadow var(--transition), transform var(--transition); }
     .player-item:hover, .team-item:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
     .pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .7rem; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 700; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary); }
@@ -143,6 +145,7 @@
     .stage-final { background: var(--color-warning); color: white; }
     .stage-q1, .stage-q2 { background: var(--color-blue); color: white; }
     .stage-eliminator { background: var(--color-error); color: white; }
+    .stage-tiebreak { background: var(--color-warning); color: white; }
     .status-pill { display: inline-flex; align-items: center; gap: .3rem; font-size: var(--text-xs); font-weight: 700; padding: .3rem .7rem; border-radius: var(--radius-full); }
     .status-pill.qualified { background: color-mix(in srgb, var(--color-success) 16%, transparent); color: var(--color-success); }
     .status-pill.qf { background: color-mix(in srgb, var(--color-purple) 16%, transparent); color: var(--color-purple); }
@@ -251,7 +254,7 @@
           <h3>Standings</h3>
           <div style="overflow:auto;">
             <table>
-              <thead><tr><th>Rank</th><th>Team</th><th>Group</th><th>Players</th><th>Played</th><th>Wins</th><th>Losses</th><th>Diff</th><th>Points</th><th>Status</th></tr></thead>
+              <thead><tr><th>Rank</th><th>Team</th><th>Group</th><th>Players</th><th>Played</th><th>Wins</th><th>Losses</th><th>Diff</th><th>Margin</th><th>Points</th><th>Status</th></tr></thead>
               <tbody id="todayStandingsBody"></tbody>
             </table>
           </div>
@@ -380,12 +383,12 @@
                 <h3>Standings</h3>
                 <div style="overflow:auto;">
                   <table>
-                    <thead><tr><th>Rank</th><th>Team</th><th>Group</th><th>Players</th><th>Played</th><th>Wins</th><th>Losses</th><th>Diff</th><th>Points</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Rank</th><th>Team</th><th>Group</th><th>Players</th><th>Played</th><th>Wins</th><th>Losses</th><th>Diff</th><th>Margin</th><th>Points</th><th>Status</th></tr></thead>
                     <tbody id="standingsBody"></tbody>
                   </table>
                 </div>
                 <div class="scoring-rule">📊 <strong>Scoring:</strong> Win = <strong>+2</strong> points | Loss = <strong>-1</strong> point | Diff = Wins - Losses</div>
-                <div class="help-text" style="margin-top:0.5rem;"><strong>Tie-breaker:</strong> 1️⃣ Points 2️⃣ Head-to-head 3️⃣ Points difference</div>
+                <div class="help-text" style="margin-top:0.5rem;"><strong>Tie-breaker:</strong> 1️⃣ Points 2️⃣ Score Margin (points scored minus conceded) 3️⃣ Head-to-head 4️⃣ Win/Loss diff — if still dead-even at a qualification spot, a Tiebreaker match decides it</div>
               </section>
               <section class="panel section">
                 <h3>Knockout Stage</h3>
@@ -397,9 +400,28 @@
 
             <div id="mgrAdminView" class="view">
               <section class="panel section">
+                <h3>Tournament Format</h3>
+                <p class="lead">Pick how the group stage and knockouts should run — this locks in once you start the tournament.</p>
+                <div class="grid-2" id="formatChoiceArea">
+                  <button class="team-item format-choice" data-format="group" style="cursor:pointer;text-align:left;">
+                    <div>
+                      <strong>🏆 Group Format</strong>
+                      <div style="font-size:var(--text-sm);color:var(--color-text-muted);margin-top:.3rem;">6+ teams split into Group A/B, Semis cross-seeded (A#1 vs B#2, B#1 vs A#2). Fewer than 6 teams automatically use IPL-style knockouts instead.</div>
+                    </div>
+                  </button>
+                  <button class="team-item format-choice" data-format="ipl" style="cursor:pointer;text-align:left;">
+                    <div>
+                      <strong>🏏 IPL Format</strong>
+                      <div style="font-size:var(--text-sm);color:var(--color-text-muted);margin-top:.3rem;">No groups — everyone plays everyone once, any team count. Top 4 (by points, then score margin) go to Qualifier 1, Eliminator, Qualifier 2 and the Final — the top team gets a second chance at the Final.</div>
+                    </div>
+                  </button>
+                </div>
+                <div class="help-text" id="formatHelpText" style="margin-top:.75rem;">Choose a format to enable Start Tournament.</div>
+              </section>
+              <section class="panel section">
                 <h3>Admin Controls</h3>
                 <div class="inline">
-                  <button class="btn btn-success" id="startTournamentBtn">🏆 Start Tournament</button>
+                  <button class="btn btn-success" id="startTournamentBtn" disabled style="opacity:.5;">🏆 Start Tournament</button>
                   <button class="btn btn-warning" id="shuffleTeamsBtn">🔀 Reshuffle All Teams</button>
                 </div>
                 <div class="inline" style="margin-top:var(--space-3);">
@@ -426,7 +448,26 @@
   <script>
     // ----- STATE -----
     const STORAGE_KEY = "badminton_tournament_final_v5";
-    const TEAM_NAMES = ['Avengers','Thunderbolts','Guardians','Asgardians','Vibranium Vipers','Wakanda Wings','Quantum Smash','Stormbreakers','Nova Racquets','Infinity Shuttlers','Web Warriors','Crimson Falcons','Mystic Hawks','Iron Rallies','Celestial Drops','Phoenix Fire','Shadow Wolves','Golden Eagles','Silver Lions','Diamond Dragons'];
+    // Team name pool — a random mashup of Marvel, DC, Looney Tunes, and
+    // straight-up badminton-pun silliness. shuffle() below means you get a
+    // different set of names every time teams are (re)generated.
+    const TEAM_NAMES = [
+      // Marvel
+      'Avengers Smash', 'Wakanda Wings', 'Web-Slinger Wonders', 'Thunder Gods', 'Iron Rallies',
+      'Guardians of the Court', 'X-Men Xtreme', 'Hulk Smashers', 'Multiverse Mavericks', 'Infinity Shuttlers',
+      'Vibranium Vipers', 'Stormbreakers', 'Mystic Hawks', 'Quantum Smashers', 'Web Warriors',
+      // DC
+      'Gotham Knights', 'Krypton Crushers', 'Amazon Warriors', 'Flash Feet', 'Justice Leaguers',
+      'Arkham Aces', 'Themyscira Titans', 'Metropolis Meteors', 'Bat-Signal Smashers', 'Lantern Corps',
+      'Kryptonite Killers', 'Suicide Smash Squad',
+      // Looney Tunes
+      'Looney Smashers', 'Tasmanian Twisters', 'Road Runner Rally', 'Wile E. Whackers', 'Bugs Bunny Bandits',
+      'Daffy Duckers', 'Tweety Terrors', 'Foghorn Feathers', 'Yosemite Sammers', 'Porky\'s Pros',
+      // Funky / just plain silly
+      'Shuttlecock Ninjas', 'Smash Bros', 'Net Ninjas', 'Racket Renegades', 'Birdie Bandits',
+      'Drop Shot Divas', 'Rally Rebels', 'Feather Fury', 'Court Crushers', 'Smashville Warriors',
+      'Backhand Bandits', 'Netbusters', 'The Shuttle Shockers', 'Love-All Legends', 'Smash Panda Squad'
+    ];
     const GROUP_THRESHOLD = 6; // teams.length >= this => split into groups + inter-group knockouts; below => single pool + IPL-style playoffs
 
     let appState = {
@@ -434,6 +475,7 @@
       teams: [],
       matches: [],
       playoffs: [],
+      tiebreakers: [], // decider matches for points ties at a qualification boundary
       // All-time player ledger — keyed by player name. Unlike players/teams/
       // matches (which are this week's session and get wiped by "Reset All"),
       // this accumulates permanently across every weekend so the ranking
@@ -441,6 +483,7 @@
       playerHistory: {},
       adminLoggedIn: false,
       tournamentStarted: false,
+      tournamentFormat: null, // null (not chosen yet) | 'group' | 'ipl' — chosen by admin before starting
       theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
       view: 'gate' // gate | today | ranking | adminLogin | manager
     };
@@ -454,7 +497,13 @@
     function teamById(id) { return appState.teams.find(t=>t.id===id) || { name:'TBD', players:[], group:'' }; }
     function rankBadgeClass(i) { return i===0 ? 'rank-1' : i===1 ? 'rank-2' : i===2 ? 'rank-3' : 'rank-other'; }
     function rankMedal(i) { return i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : ''; }
-    function usesGroups() { return appState.teams.length >= GROUP_THRESHOLD; }
+    // 'ipl' format always forces a single round-robin pool, regardless of team
+    // count. 'group' format (or no explicit choice yet, e.g. before Start
+    // Tournament) keeps the original team-count threshold behavior.
+    function usesGroups() {
+      if (appState.tournamentFormat === 'ipl') return false;
+      return appState.teams.length >= GROUP_THRESHOLD;
+    }
 
     // ----- PERSISTENCE -----
     function saveState() {
@@ -469,9 +518,11 @@
           appState.teams = parsed.teams || [];
           appState.matches = parsed.matches || [];
           appState.playoffs = parsed.playoffs || [];
+          appState.tiebreakers = parsed.tiebreakers || [];
           appState.playerHistory = parsed.playerHistory || {};
           appState.adminLoggedIn = false; // never auto-restore an admin session
           appState.tournamentStarted = parsed.tournamentStarted || false;
+          appState.tournamentFormat = parsed.tournamentFormat || null;
           appState.theme = parsed.theme || 'light';
           return true;
         }
@@ -484,8 +535,10 @@
       appState.teams = data.teams || [];
       appState.matches = data.matches || [];
       appState.playoffs = data.playoffs || [];
+      appState.tiebreakers = data.tiebreakers || [];
       appState.playerHistory = data.playerHistory || {};
       appState.tournamentStarted = !!data.tournamentStarted;
+      appState.tournamentFormat = data.tournamentFormat || null;
     }
 
     // ----- THEME -----
@@ -518,6 +571,7 @@
         appState.teams = [];
         appState.matches = [];
         appState.playoffs = [];
+        appState.tiebreakers = [];
         return;
       }
 
@@ -574,6 +628,7 @@
       
       appState.matches = matches;
       appState.playoffs = [];
+      appState.tiebreakers = [];
     }
 
     // ----- STANDINGS -----
@@ -585,9 +640,21 @@
         const losses = played - wins;
         const diff = wins - losses;
         const points = (wins * 2) + (losses * -1);
-        return { ...team, played, wins, losses, diff, points };
+        // Score margin: total points scored minus points conceded across all
+        // played matches — the "who won by how much" tiebreaker, similar to
+        // net run rate in cricket.
+        let scoreFor = 0, scoreAgainst = 0;
+        teamMatches.forEach(m => {
+          if (!m.winner || m.scoreA === null || m.scoreA === undefined || m.scoreB === null || m.scoreB === undefined) return;
+          const isTeamA = m.teamA === team.id;
+          scoreFor += isTeamA ? m.scoreA : m.scoreB;
+          scoreAgainst += isTeamA ? m.scoreB : m.scoreA;
+        });
+        const scoreMargin = scoreFor - scoreAgainst;
+        return { ...team, played, wins, losses, diff, points, scoreFor, scoreAgainst, scoreMargin };
       }).sort((a,b) => {
         if (b.points !== a.points) return b.points - a.points;
+        if (b.scoreMargin !== a.scoreMargin) return b.scoreMargin - a.scoreMargin;
         const headToHead = appState.matches.find(m => 
           (m.teamA === a.id && m.teamB === b.id) || (m.teamA === b.id && m.teamB === a.id)
         );
@@ -673,19 +740,73 @@
     // out any semi-final/final result the moment it was saved. Now, once
     // appState.playoffs has matches in it, this function leaves them alone —
     // recorded scores and winners persist across renders.
+    //
+    // Before building the bracket, we also check for a points TIE sitting
+    // exactly on a qualification boundary (e.g. 2nd/3rd in a group, or 4th/5th
+    // in a single pool). Rather than resolve that silently via head-to-head or
+    // point-diff, we generate a real decider "Tiebreaker" match — the loser is
+    // eliminated, the winner takes the spot. Everything pauses until it's played.
+    function findTwoWayBoundaryTie(pool, cutoff) {
+      if (pool.length <= cutoff) return null;
+      const sorted = [...pool].sort((a,b) => b.points - a.points || b.scoreMargin - a.scoreMargin);
+      const boundaryIn = sorted[cutoff-1], boundaryOut = sorted[cutoff];
+      if (boundaryIn.points !== boundaryOut.points || boundaryIn.scoreMargin !== boundaryOut.scoreMargin) return null;
+      const tiedPoints = boundaryIn.points, tiedMargin = boundaryIn.scoreMargin;
+      const tied = sorted.filter(t => t.points === tiedPoints && t.scoreMargin === tiedMargin);
+      const clearlyQualified = sorted.filter(t => t.points > tiedPoints || (t.points === tiedPoints && t.scoreMargin > tiedMargin)).length;
+      const spotsAvailable = cutoff - clearlyQualified;
+      if (tied.length === 2 && spotsAvailable === 1) return { teamA: tied[0], teamB: tied[1] };
+      return null; // 3+-way ties are rare for small weekend groups — fall back to head-to-head/diff/name
+    }
+
+    function resolvedPoolExcludingTiebreakLosers(pool) {
+      const loserIds = appState.tiebreakers.filter(tb => tb.winner).map(tb => tb.winner === tb.teamA ? tb.teamB : tb.teamA);
+      return pool.filter(t => !loserIds.includes(t.id));
+    }
+
+    function tiebreaksAllResolved() {
+      return appState.tiebreakers.length === 0 || appState.tiebreakers.every(tb => !!tb.winner);
+    }
+
     function generatePlayoffs() {
       const standings = buildStandings();
       const ready = allGroupMatchesFinished() && appState.tournamentStarted && standings.length >= 2;
 
       if (!ready) {
-        appState.playoffs = []; // group stage not finished / reset — nothing to show yet
+        appState.playoffs = [];
+        appState.tiebreakers = []; // group stage not finished / reset — nothing to show yet
         return;
       }
       if (appState.playoffs.length > 0) return; // already generated — don't overwrite recorded results
 
       if (usesGroups()) {
+        if (appState.tiebreakers.length === 0) {
+          const groupA = standings.filter(t => t.group === 'A');
+          const groupB = standings.filter(t => t.group === 'B');
+          const tieA = findTwoWayBoundaryTie(groupA, 2);
+          const tieB = findTwoWayBoundaryTie(groupB, 2);
+          if (tieA || tieB) {
+            const decider = [];
+            if (tieA) decider.push({ id: uid('tb'), stage: 'Group A Tiebreaker (for 2nd place)', teamA: tieA.teamA.id, teamB: tieA.teamB.id, winner: null, scoreA: null, scoreB: null, type: 'tiebreak' });
+            if (tieB) decider.push({ id: uid('tb'), stage: 'Group B Tiebreaker (for 2nd place)', teamA: tieB.teamA.id, teamB: tieB.teamB.id, winner: null, scoreA: null, scoreB: null, type: 'tiebreak' });
+            appState.tiebreakers = decider;
+            toast('⚖️ Points tie for a Semi-final spot — play the Tiebreaker match(es) below first!');
+            return;
+          }
+        }
+        if (!tiebreaksAllResolved()) return; // waiting on a decider result
         generateGroupCrossoverPlayoffs(standings);
       } else {
+        const cutoff = Math.min(4, standings.length);
+        if (appState.tiebreakers.length === 0 && standings.length > 4) {
+          const tie = findTwoWayBoundaryTie(standings, cutoff);
+          if (tie) {
+            appState.tiebreakers = [{ id: uid('tb'), stage: `Tiebreaker (for the last knockout spot)`, teamA: tie.teamA.id, teamB: tie.teamB.id, winner: null, scoreA: null, scoreB: null, type: 'tiebreak' }];
+            toast('⚖️ Points tie for the last knockout spot — play the Tiebreaker match below first!');
+            return;
+          }
+        }
+        if (!tiebreaksAllResolved()) return; // waiting on a decider result
         generateIplStylePlayoffs(standings);
       }
     }
@@ -695,8 +816,8 @@
     //   Semi 1: Group A #1  vs  Group B #2
     //   Semi 2: Group B #1  vs  Group A #2
     function generateGroupCrossoverPlayoffs(standings) {
-      const groupA = standings.filter(t => t.group === 'A');
-      const groupB = standings.filter(t => t.group === 'B');
+      const groupA = resolvedPoolExcludingTiebreakLosers(standings.filter(t => t.group === 'A'));
+      const groupB = resolvedPoolExcludingTiebreakLosers(standings.filter(t => t.group === 'B'));
       if (groupA.length < 2 || groupB.length < 2) {
         toast('Need at least 2 teams in each group to seed the Semi-finals.');
         return;
@@ -716,19 +837,21 @@
     // a shot at the Final (Qualifier 1 winner goes straight through; the
     // loser gets a second chance in Qualifier 2 against the Eliminator winner).
     function generateIplStylePlayoffs(standings) {
-      if (standings.length === 2) {
-        appState.playoffs = [{ id: uid('final'), stage: 'Final', teamA: standings[0].id, teamB: standings[1].id, winner: null, scoreA: null, scoreB: null, type: 'final' }];
+      const pool = resolvedPoolExcludingTiebreakLosers(standings).sort((a,b) => b.points - a.points || b.scoreMargin - a.scoreMargin || b.diff - a.diff || a.name.localeCompare(b.name));
+
+      if (pool.length === 2) {
+        appState.playoffs = [{ id: uid('final'), stage: 'Final', teamA: pool[0].id, teamB: pool[1].id, winner: null, scoreA: null, scoreB: null, type: 'final' }];
         toast('🏆 Only 2 teams — going straight to the Final!');
         return;
       }
-      if (standings.length === 3) {
-        const semi = { id: uid('semi'), stage: 'Semi-final', teamA: standings[1].id, teamB: standings[2].id, winner: null, scoreA: null, scoreB: null, type: 'semi' };
-        const final = { id: uid('final'), stage: 'Final', teamA: standings[0].id, teamB: null, winner: null, scoreA: null, scoreB: null, type: 'final' };
+      if (pool.length === 3) {
+        const semi = { id: uid('semi'), stage: 'Semi-final', teamA: pool[1].id, teamB: pool[2].id, winner: null, scoreA: null, scoreB: null, type: 'semi' };
+        const final = { id: uid('final'), stage: 'Final', teamA: pool[0].id, teamB: null, winner: null, scoreA: null, scoreB: null, type: 'final' };
         appState.playoffs = [semi, final];
         toast('🏆 3 teams — Rank 1 waits in the Final, Ranks 2 & 3 play a Semi-final!');
         return;
       }
-      const top4 = standings.slice(0, 4);
+      const top4 = pool.slice(0, 4);
       const q1 = { id: uid('q1'), stage: 'Qualifier 1', teamA: top4[0].id, teamB: top4[1].id, winner: null, scoreA: null, scoreB: null, type: 'q1' };
       const elim = { id: uid('elim'), stage: 'Eliminator', teamA: top4[2].id, teamB: top4[3].id, winner: null, scoreA: null, scoreB: null, type: 'eliminator' };
       const q2 = { id: uid('q2'), stage: 'Qualifier 2', teamA: null, teamB: null, winner: null, scoreA: null, scoreB: null, type: 'q2' };
@@ -784,6 +907,7 @@
       let match = appState.matches.find(m => m.id === matchId);
       let isPlayoff = false;
       if (!match) { match = appState.playoffs.find(m => m.id === matchId); isPlayoff = true; }
+      if (!match) { match = appState.tiebreakers.find(m => m.id === matchId); isPlayoff = false; }
       if (!match || !match.teamA || !match.teamB) return;
 
       match.scoreA = scoreA;
@@ -846,7 +970,7 @@
     }
 
     function playoffCardHTML(match, opts) {
-      const stageClassMap = { qf: 'stage-qf', semi: 'stage-semi', final: 'stage-final', q1: 'stage-q1', q2: 'stage-q2', eliminator: 'stage-eliminator' };
+      const stageClassMap = { qf: 'stage-qf', semi: 'stage-semi', final: 'stage-final', q1: 'stage-q1', q2: 'stage-q2', eliminator: 'stage-eliminator', tiebreak: 'stage-tiebreak' };
       const html = matchCardHTML(match, opts);
       // swap the generic pill for a colored stage badge
       return html.replace('<span class="pill">', `<span class="stage-badge ${stageClassMap[match.type] || ''}">`);
@@ -922,6 +1046,28 @@
           : `${teams} team${teams===1?'':'s'} in one pool — everyone plays everyone. Knockouts follow an IPL-style format: Qualifier 1, Eliminator, Qualifier 2, Final.`;
     }
 
+    function renderFormatChoice() {
+      $$('.format-choice').forEach(btn => {
+        btn.classList.toggle('active', appState.tournamentFormat === btn.dataset.format);
+        btn.disabled = appState.tournamentStarted;
+        btn.style.opacity = appState.tournamentStarted ? '0.6' : '1';
+      });
+      const startBtn = $('#startTournamentBtn');
+      const canStart = !!appState.tournamentFormat && !appState.tournamentStarted;
+      if (!appState.tournamentStarted) {
+        startBtn.disabled = !appState.tournamentFormat;
+        startBtn.style.opacity = appState.tournamentFormat ? '1' : '0.5';
+      } else {
+        startBtn.disabled = true;
+        startBtn.style.opacity = '0.5';
+      }
+      $('#formatHelpText').textContent = appState.tournamentStarted
+        ? `Locked in: ${appState.tournamentFormat === 'ipl' ? 'IPL Format' : 'Group Format'}`
+        : appState.tournamentFormat
+          ? `Selected: ${appState.tournamentFormat === 'ipl' ? 'IPL Format' : 'Group Format'} — ready to Start Tournament.`
+          : 'Choose a format to enable Start Tournament.';
+    }
+
     function renderMatches() {
       const list = $('#matchList');
       if (!appState.matches.length) { list.innerHTML = '<div class="note">No fixtures yet. Add players to create matches!</div>'; $('#statMatches').textContent = '0'; return; }
@@ -950,6 +1096,7 @@
         }
         const grp = row.group || '—';
         const medal = rankMedal(i);
+        const marginLabel = row.scoreMargin > 0 ? `+${row.scoreMargin}` : `${row.scoreMargin}`;
         html += `<tr class="${rowClass}">
           <td><span class="rank-badge ${rankBadgeClass(i)}">${medal || (i+1)}</span></td>
           <td><strong>${row.name}</strong></td>
@@ -959,6 +1106,7 @@
           <td>${row.wins}</td>
           <td>${row.losses}</td>
           <td>${row.diff}</td>
+          <td>${marginLabel}</td>
           <td><strong>${row.points}</strong></td>
           <td>${status}</td>
         </tr>`;
@@ -968,7 +1116,7 @@
 
     function renderStandings() {
       const standings = buildStandings();
-      if (!standings.length) { $('#standingsBody').innerHTML = '<tr><td colspan="10">No standings yet.</td></tr>'; return; }
+      if (!standings.length) { $('#standingsBody').innerHTML = '<tr><td colspan="11">No standings yet.</td></tr>'; return; }
       const groupStageDone = allGroupMatchesFinished() && appState.tournamentStarted;
       $('#standingsBody').innerHTML = standingsRowsHTML(standings, groupStageDone);
     }
@@ -990,6 +1138,9 @@
       if (!allGroupMatchesFinished()) return '⏳ Group stage in progress. Complete all matches to generate knockouts.';
       const standings = buildStandings();
       if (standings.length < 2) return 'Need at least 2 teams for a knockout stage.';
+      if (appState.tiebreakers.length > 0 && !tiebreaksAllResolved()) {
+        return '⚖️ Points tie detected! Play the Tiebreaker match(es) below to decide who advances.';
+      }
       if (usesGroups()) {
         return '🏆 Group stage complete! Semi-finals are set: Group A #1 vs Group B #2, and Group B #1 vs Group A #2.';
       }
@@ -1002,12 +1153,14 @@
       championEl.innerHTML = championBannerHTML();
 
       const wrap = $(`#${prefix === 'today' ? 'todayPlayoffMatches' : 'playoffMatches'}`);
+      const tiebreakCards = appState.tiebreakers.filter(t => t.teamA && t.teamB).map(m => playoffCardHTML(m, { readOnly: prefix === 'today' })).join('');
       const playable = appState.playoffs.filter(p => p.teamA && p.teamB);
-      if (!playable.length) {
+
+      if (!tiebreakCards && !playable.length) {
         wrap.innerHTML = '<div class="note">Knockout matches will appear here once the group stage is complete.</div>';
         return;
       }
-      wrap.innerHTML = playable.map(m => playoffCardHTML(m, { readOnly: prefix === 'today' })).join('');
+      wrap.innerHTML = tiebreakCards + playable.map(m => playoffCardHTML(m, { readOnly: prefix === 'today' })).join('');
     }
 
     function renderTeamEditor() {
@@ -1059,7 +1212,7 @@
 
       const standings = buildStandings();
       const groupStageDone = allGroupMatchesFinished() && appState.tournamentStarted;
-      $('#todayStandingsBody').innerHTML = standings.length ? standingsRowsHTML(standings, groupStageDone) : '<tr><td colspan="10">No standings yet.</td></tr>';
+      $('#todayStandingsBody').innerHTML = standings.length ? standingsRowsHTML(standings, groupStageDone) : '<tr><td colspan="11">No standings yet.</td></tr>';
 
       renderKnockouts('today');
     }
@@ -1090,6 +1243,7 @@
       renderPlayers();
       renderTeams();
       renderFormatBanner();
+      renderFormatChoice();
       renderMatches();
       generatePlayoffs();
       renderStandings();
@@ -1124,12 +1278,33 @@
     }
 
     // ----- START TOURNAMENT -----
+    // Applies the admin's chosen format to the final team groupings and
+    // regenerates fixtures accordingly, right before the tournament locks.
+    function finalizeFormatAndFixtures() {
+      if (appState.tournamentFormat === 'ipl') {
+        appState.teams.forEach(t => { t.group = null; });
+      } else {
+        const shuffled = shuffle([...appState.teams]);
+        if (shuffled.length >= GROUP_THRESHOLD) {
+          const half = Math.ceil(shuffled.length / 2);
+          shuffled.forEach((t, idx) => { t.group = idx < half ? 'A' : 'B'; });
+        } else {
+          shuffled.forEach(t => { t.group = null; });
+        }
+        appState.teams = shuffled;
+      }
+      generateMatches(); // rebuilds fixtures using the finalized grouping (usesGroups() now reflects the chosen format)
+    }
+
     function startTournament() {
       if (appState.players.length < 4) return toast('Need at least 4 players to start!');
       if (appState.players.length % 2 !== 0) return toast('Need even number of players! Add one more player.');
       if (appState.teams.length < 2) return toast('Need at least 2 teams!');
+      if (!appState.tournamentFormat) return toast('Choose a Tournament Format above first!');
+      finalizeFormatAndFixtures();
       appState.tournamentStarted = true;
-      toast('🏆 Tournament started! All teams and fixtures are locked.');
+      const formatLabel = appState.tournamentFormat === 'ipl' ? 'IPL Format' : 'Group Format';
+      toast(`🏆 Tournament started (${formatLabel})! All teams and fixtures are locked.`);
       renderAll();
     }
 
@@ -1151,8 +1326,10 @@
         teams: appState.teams,
         matches: appState.matches,
         playoffs: appState.playoffs,
+        tiebreakers: appState.tiebreakers,
         playerHistory: appState.playerHistory,
-        tournamentStarted: appState.tournamentStarted
+        tournamentStarted: appState.tournamentStarted,
+        tournamentFormat: appState.tournamentFormat
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -1240,12 +1417,22 @@
       }
 
       if (target.id === 'logoutBtn') { appState.adminLoggedIn = false; toast('Logged out.'); goToView('gate'); return; }
+      if (target.dataset.format) {
+        if (appState.tournamentStarted) { toast('Tournament already started — format is locked.'); return; }
+        appState.tournamentFormat = target.dataset.format;
+        toast(`Format set: ${target.dataset.format === 'ipl' ? 'IPL Format' : 'Group Format'}`);
+        renderAll();
+        return;
+      }
+
       if (target.id === 'startTournamentBtn') return startTournament();
       if (target.id === 'shuffleTeamsBtn') return shuffleTeams();
 
       if (target.id === 'clearResultsBtn') {
         appState.matches.forEach(m => { recordMatchWinner(m, null); m.scoreA = null; m.scoreB = null; });
         appState.playoffs.forEach(m => { recordMatchWinner(m, null); m.scoreA = null; m.scoreB = null; });
+        appState.tiebreakers.forEach(m => { recordMatchWinner(m, null); m.scoreA = null; m.scoreB = null; });
+        appState.tiebreakers = [];
         toast('All results cleared (player ranking adjusted to match).');
         renderAll();
         return;
@@ -1258,7 +1445,9 @@
         appState.teams = [];
         appState.matches = [];
         appState.playoffs = [];
+        appState.tiebreakers = [];
         appState.tournamentStarted = false;
+        appState.tournamentFormat = null;
         appState.adminLoggedIn = false;
         toast('Reset for a new session. Player rankings are kept.');
         goToView('gate');
